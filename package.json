@@ -5,7 +5,7 @@
   "version": "0.0.0",
   "repository": {
     "type": "git",
-    "url": "git://github.com/WhereDoIGo.git"
+    "url": "git://github.com/kywe665/network-debugger.git"
   },
   "bin": {
     "netbug-server": "bin/server.js"
@@ -13,7 +13,12 @@
   "publishConfig": {
     "registry": "https://registry.npmjs.org"
   },
-  "dependencies": {},
+  "dependencies": {
+    "steve": "~0.5.10",
+    "socket.io": "~0.9.6",
+    "connect": "~2.3.0",
+    "connect_router": "~1.8.6"
+  },
   "devDependencies": {},
   "optionalDependencies": {},
   "engines": {

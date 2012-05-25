@@ -14,6 +14,8 @@ pushd browser
   WEBPUB='../webclient-deployed'
   rm -rf "${WEBPUB}"
   mkdir -p "${WEBPUB}/"
+  
+  rsync -a static/ "${WEBPUB}/"
 
   jade index.jade
   mv index.html "${WEBPUB}/"
