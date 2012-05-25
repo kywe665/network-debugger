@@ -1,0 +1,30 @@
+{
+   "author": "Kyle Weller <kywe665@gmail.com>",
+  "name": "netbug",
+  "description": "Network Debugger",
+  "version": "0.0.0",
+  "repository": {
+    "type": "git",
+    "url": "ssh://git@github.com/WhereDoIGo.git"
+  },
+  "main": "lib/index",
+  "scripts": {
+    "test": "run-tests"
+  },
+  "browserDependencies": {
+    "ahr2": "2.x",
+    "bonzo": "1.x",
+    "qwery": "3.x",
+    "reqwest": "*",
+    "bean": "0.4.x",
+    "domready": "0.2.x",
+    "url": "*",
+    "socket.io-browser": "*"
+  },
+  "dependencies": {},
+  "devDependencies": {},
+  "optionalDependencies": {},
+  "engines": {
+    "node": "*"
+  }
+}

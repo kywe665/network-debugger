@@ -1,0 +1,22 @@
+{
+  "author": "Kyle Weller <kywe665@gmail.com>",
+  "name": "netbug",
+  "description": "Network Debugger",
+  "version": "0.0.0",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/WhereDoIGo.git"
+  },
+  "bin": {
+    "netbug-server": "bin/server.js"
+  },
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org"
+  },
+  "dependencies": {},
+  "devDependencies": {},
+  "optionalDependencies": {},
+  "engines": {
+    "node": "*"
+  }
+}

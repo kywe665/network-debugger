@@ -1,0 +1,55 @@
+!!! 5
+html(lang='en')
+  head
+    title Network Debugger
+    link(rel='stylesheet', type='text/css', href='style.css')
+  body
+    .background
+      .header
+        img(src='http://remote.spotterrf.com:7771/images/logo_small.png', alt='')
+        h1 Network Debugger
+      .container
+          ul.css-tab-menu
+            li.js-ui-tab.js-http
+              a(href='/http') HTTP
+            li.js-ui-tab.js-tcp
+              a(href='/tcp') TCP
+            li.js-ui-tab.js-udp
+              a(href='/udp') UDP
+          .js-ui-tab-view.css-ui-tab-view(data-name='tcp')
+            p Enter the port to listen on and click 'Listen'
+            .css-listen-form
+              input.js-tcp-portNum.css-tcp-portNum(type='text')
+              a.css-button.js-tcp-openSocket Listen
+            .css-connection-info
+              .css-connection-status.js-tcp-connection-status.off Connection Status
+              div Listening to
+                span.css-connection-count.js-tcp-connection-count 0
+                span devices
+            a.css-button.js-tcp-testSocket.css-tcp-testSocket Test Connection
+            .js-tcp-stream.css-stream
+            div.css-left.css-bottom
+              a.css-button.js-tcp-closeSocket.inactive Close Connection
+            div.css-center.css-bottom
+              a.css-button.js-tcp-clear Clear
+            div.css-right.css-bottom
+              p Lock scroll to bottom
+              input.js-tcp-scroll(type="checkbox")(checked="true")
+          .js-ui-tab-view.css-ui-tab-view(data-name='http')
+            p Enter the port to listen on and click 'Listen'
+            .css-listen-form
+              input.js-http-portNum.css-tcp-portNum(type='text')
+              a.css-button.js-http-openSocket Listen
+            .css-connection-info
+              .css-connection-status.js-http-connection-status.off Connection Status
+            .js-http-stream.css-stream
+            div.css-left.css-bottom
+              a.css-button.js-http-closeSocket.inactive Close Connection
+            div.css-center.css-bottom
+              a.css-button.js-http-clear Clear
+            div.css-right.css-bottom
+              p Lock scroll to bottom
+              input.js-http-scroll(type="checkbox")(checked="true")
+          .js-ui-tab-view.css-ui-tab-view(data-name='udp')
+
+script(src='pakmanaged.js', type='text/javascript')
