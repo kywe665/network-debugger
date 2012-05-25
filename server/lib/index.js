@@ -9,6 +9,7 @@
     , app = connect()
     , net = require('net')
     , util = require('util')
+    , dgram = require('dgram')
     , listener
     , browserSocket
     , currentPort
@@ -17,35 +18,80 @@
     , socketMap = {}
     , openedConnections = 0
     , closedConnections = 0
-
     , connectHttp = require('connect')
     , connectObj
     , serverHttp
+    , serverUdp
     ;
 
   connect.router = require('connect_router');
+
+  //function when a GET request is sent to /listenUDP
+  function listenUdp(request, response) {
+    openSockets();
+    serverUdp = dgram.createSocket('udp4');
+    serverUdp.on("message", function (msg, rinfo) {
+      var message = "server got: " + msg + " from " + rinfo.address + ":" + rinfo.port;
+      console.log(message);
+      browserSocket.emit('udpData', {"body": message});
+    });
+    serverUdp.on("listening", function () {
+      var address = serverUdp.address();
+      console.log("server listening " +
+          address.address + ":" + address.port);
+    });
+    serverUdp.on("close", function () {
+      console.log("UDP CLOSED: ");
+      browserSocket.emit('closedConnection', request.params.portNum, 'udp');
+    });
+    serverUdp.on("error", function (e) {
+      console.log("UDP error: " + e);
+    });
+    serverUdp.bind(request.params.portNum);
+    response.end();
+  }
 
   //function when a GET request is sent to /listenHTTP
   function listenHttp(request, response) {
     console.log(request.params.portNum);
     var connectObj = connect()
-      .use(connectHttp.bodyParser())
+      //.use(connectHttp.bodyParser())
+      .use(getBody)
       .use(readHttp);
     serverHttp = connectObj.listen(request.params.portNum);
     serverHttp.on('close', function() {
       console.log('HTTP server closed');
-      browserSocket.emit('closedConnection', request.params.portNum);
+      browserSocket.emit('closedConnection', request.params.portNum, 'http');
     });
     openSockets();
     response.end();
   }
+
+  function getBody(req, res, next) {
+    var data = ''
+      ;
+    req.on('data', function (chunk) {
+      data += chunk.toString('utf8');
+    });
+    req.on('end', function() {
+      req.rawBody = data;
+      next();
+    });
+  }
+
   function readHttp (req, res){
-    var data;
-    data = 'Method: '+ req.method;
-    data += '<br/>Headers: '+ JSON.stringify(req.headers);
-    data += '<br/>Body: '+ JSON.stringify(req.body);
-    data += '<br/>URL: '+ req.url;
-    browserSocket.send(data);
+    var data = ''
+      ;
+    data += req.method.toUpperCase() + ' ' + req.url + ' ' + 'HTTP/' + req.httpVersion + '\r\n';
+    Object.keys(req.headers).forEach(function (key) {
+      data += key + ': ' + req.headers[key] + '\r\n';
+    });
+    data += '\r\n';
+    browserSocket.emit('httpData', {
+        "headers": data
+      , "body": req.rawBody
+      , "protocol": 'http'
+    });
     //browserSocket.send(JSON.stringify(req));
     res.end('Hello from Connect!\n');
   }
@@ -75,6 +121,10 @@
       socket.on('killHttp', function () {
         console.log('killHttp');
         serverHttp.close();
+      });
+      socket.on('killUdp', function () {
+        console.log('killUdp');
+        serverUdp.close();
       });
       socket.on('close', function () { 
         console.log('ClOsEd Socket');
@@ -145,12 +195,13 @@
       socketMap[socket].destroy();
     });
     listener.close();
-    browserSocket.emit('closedConnection', currentPort);
+    browserSocket.emit('closedConnection', currentPort, 'tcp');
   }
 
   function router(rest) {
     rest.get('/listenTCP/:portNum', listenTcp);
     rest.get('/listenHTTP/:portNum', listenHttp);
+    rest.get('/listenUDP/:portNum', listenUdp);
   }
 
   app.use(connect.favicon());
@@ -160,3 +211,4 @@
   module.exports = app;
 
 }());
+

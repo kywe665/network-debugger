@@ -13,8 +13,7 @@
     , location = window.location
     , uiTabs = require('./ui-tabs')
     , io = require('socket.io-browser')
-    , socketTcp
-    , socketHttp
+    , socket
     ;
   //Create Tabs
   uiTabs.create('body', '.js-ui-tab a', '.js-ui-tab', '.js-ui-tab-view', 'http');
@@ -29,17 +28,17 @@
     }
   });
   $('.container').on('.js-tcp-testSocket', 'click', function(){
-    socketTcp.emit('testSocket');
+    socket.emit('testSocket');
   });
   $('.container').on('.js-tcp-closeSocket:not(.inactive)', 'click', function(){
-    socketTcp.emit('allDone');
+    socket.emit('allDone');
   });
   $('.container').on('.js-tcp-openSocket:not(.inactive)', 'click', function(){
     var options = {}
       , port = $('.js-tcp-portNum').val()
       ;
-    options.msg = '';
-    options.type = 'tcp';
+    options.body = '';
+    options.protocol = 'tcp';
     reqwest({
       url: 'http://'+window.location.host+'/listenTCP/'+port
     , type: 'json'
@@ -47,7 +46,7 @@
     , error: function (err) { 
         console.log('Server Error: ', err);
         options.error = true;
-        options.msg = 'Cannot communicate with netbug server';
+        options.body = 'Cannot communicate with netbug server';
         writeMsg(options);
       }
     , success: function (resp) {
@@ -57,16 +56,16 @@
           options.active = true;
           stateChange(options);
           if(resp.result.socket){
-            options.msg += '<span class="css-streamNewConnection">Socket opened succesfully. ';
+            options.body += '<span class="css-streamNewConnection">TCP Socket opened succesfully. ';
           }
           if(resp.result.listening){
-            options.msg += 'Listening on port: '+ port +' </span>';
+            options.body += 'Listening on port: '+ port +' </span>';
           }
         }
         else{
           options.error = true;
           for(i=0; i < resp.errors.length; i=i+1){
-						options.msg += resp.errors[i].message;
+						options.body += resp.errors[i].message;
 					}
         }
         writeMsg(options);
@@ -84,14 +83,14 @@
     }
   });
   $('.container').on('.js-http-closeSocket:not(.inactive)', 'click', function(){
-    socketHttp.emit('killHttp');
+    socket.emit('killHttp');
   });
   $('.container').on('.js-http-openSocket', 'click', function(){
      var options = {}
       , port = $('.js-http-portNum').val()
       ;
-    options.msg = '';
-    options.type = 'http';
+    options.body = '';
+    options.protocol = 'http';
     reqwest({
       url: 'http://'+window.location.host+'/listenHTTP/'+port
     , type: 'json'
@@ -99,7 +98,7 @@
     , error: function (err) { 
         console.log('Server Error: ', err);
         options.error = true;
-        options.msg = 'Cannot communicate with netbug server';
+        options.body = 'Cannot communicate with netbug server';
         writeMsg(options);
       }
     , success: function (resp) {
@@ -108,13 +107,13 @@
         if(!resp.error){
           options.active = true;
           stateChange(options);
-          options.msg += '<span class="css-streamNewConnection">Socket opened succesfully. ';
-          options.msg += 'Listening on port: '+ port +' </span>';
+          options.body += '<span class="css-streamNewConnection">HTTP Socket opened succesfully. ';
+          options.body += 'Listening on port: '+ port +' </span>';
         }
         else{
           options.error = true;
           for(i=0; i < resp.errors.length; i=i+1){
-						options.msg += resp.errors[i].message;
+						options.body += resp.errors[i].message;
 					}
         }
         writeMsg(options);
@@ -122,116 +121,164 @@
     });
     openSocket(options);
   });
-  
-  function openSocket(options) {
-    if(options.type === 'tcp'){
-      socketTcp = io.connect('http://'+window.location.hostname+':3454');
-      socketTcp.on('connect', function () {
-        socketTcp.send('hi');
-        socketTcp.on('message', function (msg) {
-          options.msg = msg;
-          socketMessage(options);
-        });
-        socketTcp.on('connectionChange', function (count, closed) {
-          options.count = count;
-          options.closed = closed;
-          socketChange(options);
-        });
-        socketTcp.on('closedConnection', function(num){
-          options.num = num;
-          socketClosed(options);
-        });
-        socketTcp.on('disconnect', function () { 
-          socketDisconnect(options);
-        });
-      });
+  //EVENT LISTENERS UDP
+  $('.container').on('.js-udp-clear', 'click', function(){
+    $('.js-udp-stream').html('');
+  });
+  $('.container').on('.js-udp-scroll', 'change', function(){
+    if($('.js-udp-scroll').attr('checked')){
+      $('.js-udp-stream')[0].scrollTop = $('.js-udp-stream')[0].scrollHeight;
     }
-    else if(options.type === 'http') {
-      socketHttp = io.connect('http://'+window.location.hostname+':3454');
-      socketHttp.on('connect', function () {
-        socketHttp.send('hi');
-        socketHttp.on('message', function (msg) {
-          options.msg = msg;
-          socketMessage(options);
-        });
-        socketHttp.on('connectionChange', function (count, closed) {
-          options.count = count;
-          options.closed = closed;
-          socketChange(options);
-        });
-        socketHttp.on('closedConnection', function(num){
-          options.num = num;
-          socketClosed(options);
-        });
-        socketHttp.on('disconnect', function () { 
-          socketDisconnect(options);
-        });
-      });
-    }
-  }
-  function socketMessage(options){
-    console.log(options.msg);
-    writeMsg(options);
-  }
-  function socketChange(options){
-    console.log('newConn '+ options.count);
-    $('.js-'+options.type+'-connection-count').html(options.count);
-    if(options.closed){
-      options.msg = '<span class="css-streamCloseConnection">Socket Closed</span>';
-    }
-    else{
-      options.msg = '<span class="css-streamNewConnection">New Socket Opened</span>';
-    }
-    writeMsg(options);
-  }
-  function socketClosed(options){
-    options.msg = '<span class="css-streamCloseConnection">Closed Connection on '+options.num+'</span>';
-    stateChange({
-      active: false,
-      type: 'http'
+  });
+  $('.container').on('.js-udp-closeSocket:not(.inactive)', 'click', function(){
+    socket.emit('killUdp');
+  });
+  $('.container').on('.js-udp-openSocket', 'click', function(){
+     var options = {}
+      , port = $('.js-udp-portNum').val()
+      ;
+    options.body = '';
+    options.protocol = 'udp';
+    reqwest({
+      url: 'http://'+window.location.host+'/listenUDP/'+port
+    , type: 'json'
+    , method: 'get'
+    , error: function (err) { 
+        console.log('Server Error: ', err);
+        options.error = true;
+        options.body = 'Cannot communicate with netbug server';
+        writeMsg(options);
+      }
+    , success: function (resp) {
+        var html, i;
+        console.log('success: ', resp);
+        if(!resp.error){
+          options.active = true;
+          stateChange(options);
+          options.body += '<span class="css-streamNewConnection">UDP Socket opened succesfully. ';
+          options.body += 'Listening on port: '+ port +' </span>';
+        }
+        else{
+          options.error = true;
+          for(i=0; i < resp.errors.length; i=i+1){
+						options.body += resp.errors[i].message;
+					}
+        }
+        writeMsg(options);
+      }
     });
-    writeMsg(options);
-  }
-  function socketDisconnect(options){
-    console.log('Browser-Disconnected socket');
-    options.error = true;
-    options.msg = 'NetBug Server Down';
-    writeMsg(options);
-    options.active = false;
-    stateChange(options);
+    openSocket(options);
+  });
+ 
+//SOCKET COMMUNICATION WITH SERVER 
+  function openSocket(options) {
+    socket = io.connect('http://'+window.location.hostname+':3454');
+    socket.on('connect', function () {
+      socket.send('hi');
+      socket.on('message', function (msg) {
+        console.log(msg);
+        options.body = msg;
+        options.protocol = 'tcp';
+        writeMsg(options);
+      });
+      socket.on('httpData', function (msg) {
+        console.log(msg);
+        writeMsg(msg);
+      });
+      socket.on('udpData', function (msg) {
+        console.log(msg);
+        msg.protocol = 'udp';
+        writeMsg(msg);
+      });
+      socket.on('connectionChange', function (count, closed) {
+        console.log('newConn '+ count);
+        $('.js-tcp-connection-count').html(count);
+        if(closed){
+          options.body = '<span class="css-streamCloseConnection">Socket Closed</span>';
+        }
+        else{
+          options.body = '<span class="css-streamNewConnection">New Socket Opened</span>';
+        }
+        options.protocol = 'tcp';
+        writeMsg(options);
+        
+      });
+      socket.on('closedConnection', function(num, protocol){
+        options.body = '<span class="css-streamCloseConnection">Closed Connection on '+num+'</span>';
+        stateChange({
+          active: false,
+          protocol: protocol
+        });
+        options.protocol = protocol;
+        writeMsg(options);
+      });
+      socket.on('disconnect', function () { 
+        console.log('Browser-Disconnected socket');
+        options.error = true;
+        options.body = 'NetBug Server Down';
+        options.protocol = 'all';
+        writeMsg(options);
+        options.active = false;
+        stateChange(options);
+      });
+    });
   }
 
   function stateChange(options){
-    if(options.active){
-      $('.js-'+options.type+'-openSocket').addClass('inactive');
-      $('.js-'+options.type+'-closeSocket').removeClass('inactive');
-      $('.js-'+options.type+'-connection-status').removeClass('off');
-      $('.js-'+options.type+'-connection-count').html('0');
+    if(options.protocol === 'all'){
+      stateChange({protocol:'tcp'});
+      stateChange({protocol:'http'});
+      stateChange({protocol:'udp'});
     }
     else{
-      $('.js-'+options.type+'-openSocket').removeClass('inactive');
-      $('.js-'+options.type+'-closeSocket').addClass('inactive');
-      $('.js-'+options.type+'-connection-status').addClass('off');
-      $('.js-'+options.type+'-connection-count').html('0');
+      if(options.active){
+        $('.js-'+options.protocol+'-openSocket').addClass('inactive');
+        $('.js-'+options.protocol+'-closeSocket').removeClass('inactive');
+        $('.js-'+options.protocol+'-connection-status').removeClass('off');
+        $('.js-'+options.protocol+'-connection-count').html('0');
+      }
+      else{
+        $('.js-'+options.protocol+'-openSocket').removeClass('inactive');
+        $('.js-'+options.protocol+'-closeSocket').addClass('inactive');
+        $('.js-'+options.protocol+'-connection-status').addClass('off');
+        $('.js-'+options.protocol+'-connection-count').html('0');
+      }
     }
   }
 
   function writeMsg(options) {
     var timeStamp = new Date()
-      , msg = $('.js-'+options.type+'-stream').html();
+      //Get all current messages
+      , msg = $('.js-'+options.protocol+'-stream').html();
+    //Write timestamp
     msg += '<span class="css-streamTime">'+timeStamp.toString()+'</span><br/>';
+    //Error message
     if (options.error){
-      msg += '<span class="css-streamError">'+options.msg+'</span>';
+      msg += '<span class="css-streamError">'+options.body+'</span>';
+    }
+    //Normal message
+    else{
+      if(options.headers){
+        msg += '<pre class="css-stream-headers">'+options.headers+'</pre> ';
+      }
+      console.log(options.body);
+      msg += '<pre>'+options.body+'</pre>';
+    }
+    //Send message to all windows
+    if(options.protocol === 'all') {
+      msg = '<span class="css-streamError">'+options.body+'</span>';
+      $('.js-allstream-error:last-child').html(msg+'<br/>');
     }
     else{
-      msg += options.msg;
+      $('.js-'+options.protocol+'-stream').html(msg+'<br/><span class="js-allstream-error"></span>');
     }
-		$('.js-'+options.type+'-stream').html(msg+'<br/>');
-		options.error = false;
+    //Scroll Lock
+    if($('.js-'+options.protocol+'-scroll').attr('checked')){
+      $('.js-'+options.protocol+'-stream')[0].scrollTop = $('.js-'+options.protocol+'-stream')[0].scrollHeight;
+    }
+    //Reset values just in case
+    options.error = false;
 		options.msg = '';
-    if($('.js-'+options.type+'-scroll').attr('checked')){
-      $('.js-'+options.type+'-stream')[0].scrollTop = $('.js-'+options.type+'-stream')[0].scrollHeight;
-    }
   }
 
   function init() {

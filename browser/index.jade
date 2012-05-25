@@ -28,6 +28,7 @@ html(lang='en')
                 span devices
             a.css-button.js-tcp-testSocket.css-tcp-testSocket Test Connection
             .js-tcp-stream.css-stream
+              span.js-allstream-error
             div.css-left.css-bottom
               a.css-button.js-tcp-closeSocket.inactive Close Connection
             div.css-center.css-bottom
@@ -43,6 +44,7 @@ html(lang='en')
             .css-connection-info
               .css-connection-status.js-http-connection-status.off Connection Status
             .js-http-stream.css-stream
+              span.js-allstream-error
             div.css-left.css-bottom
               a.css-button.js-http-closeSocket.inactive Close Connection
             div.css-center.css-bottom
@@ -51,5 +53,20 @@ html(lang='en')
               p Lock scroll to bottom
               input.js-http-scroll(type="checkbox")(checked="true")
           .js-ui-tab-view.css-ui-tab-view(data-name='udp')
+            p Enter the port to listen on and click 'Listen'
+            .css-listen-form
+              input.js-udp-portNum.css-tcp-portNum(type='text')
+              a.css-button.js-udp-openSocket Listen
+            .css-connection-info
+              .css-connection-status.js-udp-connection-status.off Connection Status
+            .js-udp-stream.css-stream
+              span.js-allstream-error
+            div.css-left.css-bottom
+              a.css-button.js-udp-closeSocket.inactive Close Connection
+            div.css-center.css-bottom
+              a.css-button.js-udp-clear Clear
+            div.css-right.css-bottom
+              p Lock scroll to bottom
+              input.js-udp-scroll(type="checkbox")(checked="true")
 
 script(src='pakmanaged.js', type='text/javascript')
