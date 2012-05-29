@@ -1,22 +1,18 @@
 @darkBackground: #1D1D1D;
-@strongYellow: #ECBB40;
+@strongYellow: #FFC925;
 @lightBackground: #8B907F;
 @lightGray: #D1D1D1;
 body{
 	font-family: "Play";
 	background-color: #23241F;
-	background-image: url('http://remote.spotterrf.com:7771/images/dark_mosaic.png');
+	background-image: url('images/dark_mosaic.png');
 }
 .centered{
 	margin-left: auto;
 	margin-right: auto;
 }
-.stretch-width (@min) {
-	min-width: @min;
-	width: 90%;
-}
 .background{
-	.stretch-width(850px);
+	width: 960px;
 	.centered;
 }
 .rounded-bottom (@radius) {
@@ -36,19 +32,21 @@ body{
 	.centered;
 	.rounded-top(15px);
 	background-color: @darkBackground;
-	height: 60px;
+	height: 50px;
 }
 .header h1{
 	color: @strongYellow;
-	line-height:60px;
+	line-height:54px;
 	text-shadow: 2px 2px 2px #000000;
+  font-size: 25px;
 }
 .header img{
 	float: left;
-	margin: 0px 20px 0px 10px;
-  width: 110px;
+	margin: 0px 20px 0px 15px;
+  width: 95px;
 }
-.css-tab-menu{ 
+.css-tab-menu{
+  -webkit-margin-before: 0;
 	li{
 		.rounded-top(8px);
 		float: left;
@@ -127,9 +125,10 @@ body{
 .css-stream{
   background-color: #222;
   color: #CCC;
-  width: 740px;
+  width: 854px;
 	height: 340px;
 	padding: 10px;
+  clear: left;
 	border: 2px groove #666;
   overflow-y: scroll;
   margin: 15px 0px;
@@ -187,11 +186,11 @@ body{
 }
 .css-bottom{
   float: left;
-  width:255px;
+  width:293px;
   p{
     float: left;
     position: relative;
-    left: 100px;
+    left: 130px;
   }
   input{
     float: right;

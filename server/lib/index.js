@@ -22,6 +22,7 @@
     , connectObj
     , serverHttp
     , serverUdp
+    , tcpMsg = {}
     ;
 
   connect.router = require('connect_router');
@@ -109,7 +110,6 @@
       browserSocket = socket;      
       socket.on('message', function (data) {
         console.log(data);
-        socket.send('you said: '+data+', I say: hello');
       });
       socket.on('disconnect', function () { 
         console.log('DiScOnNected socket');
@@ -135,7 +135,7 @@
     });
   }
 
-  //Open Sockets to listen on network
+  //Open Sockets to listen on network TCP
   function startListening (request, response) {
     var success = {};
     success.socket = true;
@@ -144,6 +144,8 @@
       //When a new socket is opened assign it a uid and map it.
       listenSocket.id = openedConnections;
       socketMap[openedConnections] = listenSocket;
+      //set the message to empty string so null value is not coaxed to string
+      tcpMsg[listenSocket.id] = '';
       openedConnections++;
       browserSocket.emit('connectionChange', openedConnections-closedConnections, false);
       //Event not quite sure
@@ -155,13 +157,14 @@
         console.log('server close');
         closedConnections++;
         console.log('destroyed socket '+ listenSocket.id);
+        browserSocket.send(tcpMsg[listenSocket.id]);
         browserSocket.emit('connectionChange', openedConnections-closedConnections, true);
         delete socketMap[listenSocket.id];
+        delete tcpMsg[listenSocket.id];
       });
       //Event when data is transferred
       listenSocket.on('data', function(data) {
-        console.log(data.toString());
-        browserSocket.send('Netcat: '+data.toString());
+        tcpMsg[listenSocket.id] += (data.toString() + '\r');
       });
     });
     //bind the server to listen to the requested port

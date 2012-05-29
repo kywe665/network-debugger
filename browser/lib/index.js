@@ -85,7 +85,7 @@
   $('.container').on('.js-http-closeSocket:not(.inactive)', 'click', function(){
     socket.emit('killHttp');
   });
-  $('.container').on('.js-http-openSocket', 'click', function(){
+  $('.container').on('.js-http-openSocket:not(.inactive)', 'click', function(){
      var options = {}
       , port = $('.js-http-portNum').val()
       ;
@@ -133,7 +133,7 @@
   $('.container').on('.js-udp-closeSocket:not(.inactive)', 'click', function(){
     socket.emit('killUdp');
   });
-  $('.container').on('.js-udp-openSocket', 'click', function(){
+  $('.container').on('.js-udp-openSocket:not(.inactive)', 'click', function(){
      var options = {}
       , port = $('.js-udp-portNum').val()
       ;
@@ -176,22 +176,18 @@
     socket.on('connect', function () {
       socket.send('hi');
       socket.on('message', function (msg) {
-        console.log(msg);
         options.body = msg;
         options.protocol = 'tcp';
         writeMsg(options);
       });
       socket.on('httpData', function (msg) {
-        console.log(msg);
         writeMsg(msg);
       });
       socket.on('udpData', function (msg) {
-        console.log(msg);
         msg.protocol = 'udp';
         writeMsg(msg);
       });
       socket.on('connectionChange', function (count, closed) {
-        console.log('newConn '+ count);
         $('.js-tcp-connection-count').html(count);
         if(closed){
           options.body = '<span class="css-streamCloseConnection">Socket Closed</span>';
@@ -261,7 +257,6 @@
       if(options.headers){
         msg += '<pre class="css-stream-headers">'+options.headers+'</pre> ';
       }
-      console.log(options.body);
       msg += '<pre>'+options.body+'</pre>';
     }
     //Send message to all windows
