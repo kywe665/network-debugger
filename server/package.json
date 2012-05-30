@@ -17,8 +17,7 @@
   "dependencies": {
     "steve": "0.5.x",
     "connect_router": "1.x",
-    "socket.io": "*",
-    "connect": "*"
+    "socket.io": "*"
   },
   "devDependencies": {},
   "optionalDependencies": {},

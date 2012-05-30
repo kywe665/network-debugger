@@ -16,6 +16,7 @@ html(lang='en')
               a(href='/tcp') TCP
             li.js-ui-tab.js-udp
               a(href='/udp') UDP
+
           .js-ui-tab-view.css-ui-tab-view(data-name='tcp')
             p Enter the port to listen on and click 'Listen'
             .css-listen-form
@@ -26,7 +27,10 @@ html(lang='en')
               div Listening to
                 span.css-connection-count.js-tcp-connection-count 0
                 span devices
-            a.css-button.js-tcp-log.css-tcp-log
+            .css-top.right
+              input.js-tcp-multifile(type="checkbox")(checked="true")
+              p Save each packet seperately
+              a.css-button.js-tcp-log.css-tcp-log
             .js-tcp-stream.js-allstream.css-stream
               span.js-allstream-error
             div.css-left.css-bottom
@@ -36,14 +40,21 @@ html(lang='en')
             div.css-right.css-bottom
               p Lock scroll to bottom
               input.js-tcp-scroll(type="checkbox")(checked="true")
+
           .js-ui-tab-view.css-ui-tab-view(data-name='http')
-            p Enter the port to listen on and click 'Listen'
+            p.css-enter-port Enter the port to listen on and click 'Listen'
+            .css-log-options
+              input.js-include-headers(type="checkbox")(checked="true")
+              p Save headers
             .css-listen-form
               input.js-http-portNum.css-tcp-portNum(type='text')
               a.css-button.js-http-openSocket Listen
             .css-connection-info
               .css-connection-status.js-http-connection-status.off Connection Status
-            a.css-button.js-http-log.css-tcp-log
+            .css-top.right
+              p Save each packet seperately
+              input.js-http-multifile(type="checkbox")(checked="true")
+              a.css-button.js-http-log.css-tcp-log
             .js-http-stream.js-allstream.css-stream
               span.js-allstream-error
             div.css-left.css-bottom
@@ -53,6 +64,7 @@ html(lang='en')
             div.css-right.css-bottom
               p Lock scroll to bottom
               input.js-http-scroll(type="checkbox")(checked="true")
+
           .js-ui-tab-view.css-ui-tab-view(data-name='udp')
             p Enter the port to listen on and click 'Listen'
             .css-listen-form
@@ -60,7 +72,10 @@ html(lang='en')
               a.css-button.js-udp-openSocket Listen
             .css-connection-info
               .css-connection-status.js-udp-connection-status.off Connection Status
-            a.css-button.js-udp-log.css-tcp-log
+            .css-top.right
+              p Save each packet seperately
+              input.js-udp-multifile(type="checkbox")(checked="true")
+              a.css-button.js-udp-log.css-tcp-log
             .js-udp-stream.js-allstream.css-stream
               span.js-allstream-error
             div.css-left.css-bottom

@@ -6,7 +6,7 @@
   "use strict";
 
   var connect = require('steve')
-    , app = connect()
+    , app = connect.createServer()
     , net = require('net')
     , util = require('util')
     , dgram = require('dgram')
@@ -23,7 +23,6 @@
     , socketMap = {}
     , openedConnections = 0
     , closedConnections = 0
-    , connectHttp = require('connect')
     , connectObj
     , serverHttp
     , serverUdp
@@ -32,6 +31,7 @@
     , isLoggingTcp = false
     , isLoggingHttp = false
     , isLoggingUdp = false
+    , includeHeaders = true
     ;
 
   connect.router = require('connect_router');
@@ -44,6 +44,7 @@
       var message = msg.toString('utf8'); //+ rinfo.address + ":" + rinfo.port;
       if(isLoggingUdp){
         udpBuffer += message + '\r\n\r\n';
+        browserSocket.emit('seperateFiles', 'udp');
       }
       browserSocket.emit('udpData', {"body": message});
     });
@@ -67,8 +68,7 @@
   //function when a GET request is sent to /listenHTTP
   function listenHttp(request, response) {
     console.log(request.params.portNum);
-    var connectObj = connect()
-      //.use(connectHttp.bodyParser())
+    var connectObj = connect.createServer()
       .use(getBody)
       .use(readHttp);
     serverHttp = connectObj.listen(request.params.portNum);
@@ -107,7 +107,13 @@
       , "protocol": 'http'
     });
     if(isLoggingHttp){
-      httpBuffer += (data + req.rawBody + '\r\n\r\n');
+      if(includeHeaders) {
+        httpBuffer += (data + req.rawBody + '\r\n\r\n');
+      }
+      else{
+        httpBuffer += (req.rawBody + '\r\n\r\n');
+      }
+      browserSocket.emit('seperateFiles', 'http');
     }
     res.end('Hello from Connect!\n');
   }
@@ -151,25 +157,37 @@
         console.log('killUdp');
         serverUdp.close();
       });
+      socket.on('writeFile', function (protocol) { 
+        console.log(protocol);
+        if (protocol === 'tcp'){
+          writeFile(protocol, tcpBuffer, currentTcpPort, function(){tcpBuffer = '';});
+        }
+        else if (protocol === 'http'){
+          writeFile(protocol, httpBuffer, currentHttpPort, function(){httpBuffer = '';});
+        }
+        else if (protocol === 'udp'){
+          writeFile(protocol, udpBuffer, currentUdpPort, function(){udpBuffer = '';});
+        }
+      });
       socket.on('close', function () { 
         console.log('ClOsEd Socket');
       });
-      socket.on('testSocket', function() {
-        socket.send('Yes, I\'m still here');
+      socket.on('includeHeaders', function (bool) { 
+        includeHeaders = bool;
       });
       socket.on('logTcp', function() {
         if(!isLoggingTcp){
           isLoggingTcp = true;
           console.log('logging tcp Start');
-          mkdir('TCP', currentTcpPort);
+          mkdir('tcp', currentTcpPort);
         }
         else{
           isLoggingTcp = false;
           if(tcpBuffer){
             //write the file
-            writeFile('TCP', tcpBuffer, currentTcpPort, function(){
+            writeFile('tcp', tcpBuffer, currentTcpPort, function(){
               tcpBuffer = '';
-              console.log('TCP Saved!');
+              console.log('tcp Saved!');
             });
           }
         }
@@ -178,15 +196,15 @@
         if(!isLoggingHttp){
           isLoggingHttp = true;
           console.log('logging Http Start');
-          mkdir('HTTP', currentHttpPort);
+          mkdir('http', currentHttpPort);
         }
         else{
           isLoggingHttp = false;
           if(httpBuffer){
             //write the file
-            writeFile('HTTP', httpBuffer, currentHttpPort, function(){
-              tcpBuffer = '';
-              console.log('HTTP Saved!');
+            writeFile('http', httpBuffer, currentHttpPort, function(){
+              httpBuffer = '';
+              console.log('http Saved!');
             });
           }
         }
@@ -195,14 +213,14 @@
         if(!isLoggingUdp){
           isLoggingUdp = true;
           console.log('logging Udp Start');
-          mkdir('UDP', currentUdpPort);
+          mkdir('udp', currentUdpPort);
         }
         else{
           isLoggingUdp = false;
           if(udpBuffer){
             //write the file
-            writeFile('UDP', udpBuffer, currentUdpPort, function(){
-              tcpBuffer = '';
+            writeFile('udp', udpBuffer, currentUdpPort, function(){
+              udpBuffer = '';
               console.log('UDP Saved!');
             });
           }
@@ -211,12 +229,12 @@
     });
   }
   
-  function writeFile(type, buffer, port, callback) {
+  function writeFile(protocol, buffer, port, callback) {
     var date = new Date()
       , filename
       ;
-    filename = date.getHours()+'-'+date.getMinutes()+'_'+(date.getMonth()+1)+'-'+date.getDate()+'-'+date.getFullYear();
-    fs.writeFile('./Log-Files/'+type+'/'+port+'/'+filename+'.txt', buffer
+    filename = date.getHours()+'-'+date.getMinutes()+'-'+date.getSeconds()+'_'+(date.getMonth()+1)+'-'+date.getDate()+'-'+date.getFullYear();
+    fs.writeFile('./Log-Files/'+protocol+'/'+port+'/'+filename+'.txt', buffer
     , function (err) {
         if (err) throw err;
         callback();
@@ -225,7 +243,7 @@
   }
   
   //Make directory for logger
-  function mkdir(type, port) {
+  function mkdir(protocol, port) {
     fs.mkdir('Log-Files', function (err, data) {
       if (err){
         if(err.code === 'EEXIST'){
@@ -233,14 +251,14 @@
         }
         else throw err;
       }
-      fs.mkdir('./Log-Files/'+type, function (err, data) {
+      fs.mkdir('./Log-Files/'+protocol, function (err, data) {
         if (err){
           if(err.code === 'EEXIST'){
-            console.log('dir '+type+' exists');
+            console.log('dir '+protocol+' exists');
           }
           else throw err;
         }
-        fs.mkdir('./Log-Files/'+type+'/'+port, function (err, data) {
+        fs.mkdir('./Log-Files/'+protocol+'/'+port, function (err, data) {
           if (err){
             if(err.code === 'EEXIST'){
               console.log('dir '+port+' exists');
@@ -287,6 +305,7 @@
         tcpMsg[listenSocket.id] += (data.toString());
         if(isLoggingTcp){
           tcpBuffer += (data.toString() + '\r\n\r\n');
+          browserSocket.emit('seperateFiles', 'tcp');
         }
       });
     });
@@ -315,6 +334,7 @@
       else console.log('other error ',e);
     });
   }
+
   //When user requests to close the connection
   function closeAllSockets() {
     Object.keys(socketMap).forEach(function(socket){

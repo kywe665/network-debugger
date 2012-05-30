@@ -93,6 +93,9 @@
   $('.container').on('.js-http-scroll', 'change', function(){
     scrollLock({protocol: 'http'});
   });
+  $('.container').on('.js-include-headers', 'change', function(){
+    socket.emit('includeHeaders', $('.js-include-headers').attr('checked'));
+  });
   $('.container').on('.js-http-closeSocket:not(.inactive)', 'click', function(){
     socket.emit('killHttp');
   });
@@ -199,6 +202,14 @@
       socket.on('udpData', function (msg) {
         msg.protocol = 'udp';
         writeMsg(msg);
+      });
+      socket.on('seperateFiles', function (protocol) {
+        console.log('trywrite');
+        console.log($('.js-'+protocol+'-multifile'));
+        if($('.js-'+protocol+'-multifile').attr('checked')) {
+          console.log('goWrite');
+          socket.emit('writeFile', protocol);
+        }
       });
       socket.on('connectionChange', function (count, closed) {
         $('.js-tcp-connection-count').html(count);
