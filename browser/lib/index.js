@@ -15,7 +15,7 @@
     , io = require('socket.io-browser')
     , socket
     , hljs = require('hljs')
-    , pd = require('pretty-data')
+    , pd = require('pretty-data').pd
     ;
   //Create Tabs
   uiTabs.create('body', '.js-ui-tab a', '.js-ui-tab', '.js-ui-tab-view', 'http');
