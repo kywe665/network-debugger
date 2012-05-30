@@ -4,7 +4,9 @@
   "use strict";
 
   var port = process.argv[2] || 0
-    , app = require('../server')
+    , create = require('../server')
+    , path = require('path')
+    , app
     ;
 
   function run() {
@@ -22,6 +24,7 @@
   }
 
   if (require.main === module) {
+    app = create(process.argv[3] || (path.join(process.cwd(), 'netbug-logs')));
     run();
   }
 }());

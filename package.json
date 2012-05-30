@@ -18,7 +18,8 @@
     "socket.io": "~0.9.6",
     "connect_router": "~1.8.6",
     "pretty-data": "~0.30.3",
-    "hljs": "~6.2.3"
+    "hljs": "~6.2.3",
+    "fs.extra": "~1.1.1"
   },
   "devDependencies": {},
   "optionalDependencies": {},
