@@ -26,8 +26,8 @@ html(lang='en')
               div Listening to
                 span.css-connection-count.js-tcp-connection-count 0
                 span devices
-            a.css-button.js-tcp-testSocket.css-tcp-testSocket Test Connection
-            .js-tcp-stream.css-stream
+            a.css-button.js-tcp-log.css-tcp-log
+            .js-tcp-stream.js-allstream.css-stream
               span.js-allstream-error
             div.css-left.css-bottom
               a.css-button.js-tcp-closeSocket.inactive Close Connection
@@ -43,7 +43,8 @@ html(lang='en')
               a.css-button.js-http-openSocket Listen
             .css-connection-info
               .css-connection-status.js-http-connection-status.off Connection Status
-            .js-http-stream.css-stream
+            a.css-button.js-http-log.css-tcp-log
+            .js-http-stream.js-allstream.css-stream
               span.js-allstream-error
             div.css-left.css-bottom
               a.css-button.js-http-closeSocket.inactive Close Connection
@@ -59,7 +60,8 @@ html(lang='en')
               a.css-button.js-udp-openSocket Listen
             .css-connection-info
               .css-connection-status.js-udp-connection-status.off Connection Status
-            .js-udp-stream.css-stream
+            a.css-button.js-udp-log.css-tcp-log
+            .js-udp-stream.js-allstream.css-stream
               span.js-allstream-error
             div.css-left.css-bottom
               a.css-button.js-udp-closeSocket.inactive Close Connection
@@ -69,4 +71,6 @@ html(lang='en')
               p Lock scroll to bottom
               input.js-udp-scroll(type="checkbox")(checked="true")
 
+script(src='./vendor/highlight.pack.js', type='text/javascript')
+script(src='./vendor/pretty-data.js', type='text/javascript')
 script(src='pakmanaged.js', type='text/javascript')

@@ -23,6 +23,8 @@
     , serverHttp
     , serverUdp
     , tcpMsg = {}
+    , fs = require('fs')
+    , isLogging = false
     ;
 
   connect.router = require('connect_router');
@@ -113,6 +115,15 @@
       });
       socket.on('disconnect', function () { 
         console.log('DiScOnNected socket');
+        /*if(listener){
+          closeAllSockets();
+        }
+        if(serverUdp){
+          serverUdp.close();
+        }
+        if(serverHttp){
+          serverHttp.close();
+        }*/
       });
       socket.on('allDone', function () {
         console.log('all done');
@@ -131,6 +142,35 @@
       });
       socket.on('testSocket', function() {
         socket.send('Yes, I\'m still here');
+      });
+      socket.on('logTcp', function(run) {
+        if(!isLogging){
+          isLogging = true;
+          console.log('logging Start');
+          fs.mkdir('Log-Files', function (err, data) {
+            if (err){
+              if(err.code === 'EEXIST'){
+                console.log('dir Log-Files exists');
+              }
+              else throw err;
+            }
+          });
+          /*fs.mkdir('./Log-Files/', function (err, data) {
+            if (err){
+              if(err.code === 'EEXIST'){
+                console.log('dir Log-Files exists');
+              }
+              else throw err;
+            }
+          });*/
+        }
+        else{
+          isLogging = false;
+          fs.writeFile('./Log-Files/logger.txt', 'Hello Node', function (err) {
+            if (err) throw err;
+            console.log('It\'s saved!');
+          });
+        }
       });
     });
   }
@@ -164,7 +204,7 @@
       });
       //Event when data is transferred
       listenSocket.on('data', function(data) {
-        tcpMsg[listenSocket.id] += (data.toString() + '\r');
+        tcpMsg[listenSocket.id] += (data.toString());
       });
     });
     //bind the server to listen to the requested port

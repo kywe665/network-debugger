@@ -14,18 +14,24 @@
     , uiTabs = require('./ui-tabs')
     , io = require('socket.io-browser')
     , socket
+    , hljs = require('hljs')
+    , pd = require('pd')
     ;
   //Create Tabs
   uiTabs.create('body', '.js-ui-tab a', '.js-ui-tab', '.js-ui-tab-view', 'http');
-  
+  hljs.initHighlightingOnLoad();
+  console.log(hljs);
+
   //EVENT LISTENERS TCP
+  $('.container').on('.js-tcp-log', 'click', function(){
+    socket.emit('logTcp');
+    $('.js-tcp-log').toggleClass('activeLog');
+  });
   $('.container').on('.js-tcp-clear', 'click', function(){
     $('.js-tcp-stream').html('');
   });
   $('.container').on('.js-tcp-scroll', 'change', function(){
-    if($('.js-tcp-scroll').attr('checked')){
-      $('.js-tcp-stream')[0].scrollTop = $('.js-tcp-stream')[0].scrollHeight;
-    }
+    scrollLock({protocol: 'tcp'});
   });
   $('.container').on('.js-tcp-testSocket', 'click', function(){
     socket.emit('testSocket');
@@ -78,9 +84,7 @@
     $('.js-http-stream').html('');
   });
   $('.container').on('.js-http-scroll', 'change', function(){
-    if($('.js-http-scroll').attr('checked')){
-      $('.js-http-stream')[0].scrollTop = $('.js-http-stream')[0].scrollHeight;
-    }
+    scrollLock({protocol: 'http'});
   });
   $('.container').on('.js-http-closeSocket:not(.inactive)', 'click', function(){
     socket.emit('killHttp');
@@ -126,9 +130,7 @@
     $('.js-udp-stream').html('');
   });
   $('.container').on('.js-udp-scroll', 'change', function(){
-    if($('.js-udp-scroll').attr('checked')){
-      $('.js-udp-stream')[0].scrollTop = $('.js-udp-stream')[0].scrollHeight;
-    }
+    scrollLock({protocol: 'udp'});
   });
   $('.container').on('.js-udp-closeSocket:not(.inactive)', 'click', function(){
     socket.emit('killUdp');
@@ -241,36 +243,102 @@
       }
     }
   }
+  function syntaxHighlight(json) {
+    json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g
+    , function (match) {
+        var cls = 'number';
+        if (/^"/.test(match)) {
+            if (/:$/.test(match)) {
+                cls = 'key';
+            } else {
+                cls = 'string';
+            }
+        } else if (/true|false/.test(match)) {
+            cls = 'boolean';
+        } else if (/null/.test(match)) {
+            cls = 'null';
+        }
+        return '<span class="' + cls + '">' + match + '</span>';
+    });
+  }
 
-  function writeMsg(options) {
+  function prepareMsg(options) {
     var timeStamp = new Date()
-      //Get all current messages
-      , msg = $('.js-'+options.protocol+'-stream').html();
-    //Write timestamp
+      , msg = ''
+      , xml
+      , xml_pp
+      , json_pp
+      ;
     msg += '<span class="css-streamTime">'+timeStamp.toString()+'</span><br/>';
-    //Error message
-    if (options.error){
+    //prepare error message
+    if (options.error || options.protocol === 'all'){
       msg += '<span class="css-streamError">'+options.body+'</span>';
+      return msg;
     }
-    //Normal message
-    else{
-      if(options.headers){
-        msg += '<pre class="css-stream-headers">'+options.headers+'</pre> ';
+    //prepare normal message w/ headers
+    if(options.headers){
+      msg += '<pre>'+options.headers;
+      //if xml
+      if(options.body.substring(0,3) === '<?x'){
+        console.log('im xml!!!');
+        xml_pp = pd.xml(options.body);
+        xml = xml_pp.replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;');
+        console.log({body: options.body, pp: xml_pp, xml: xml});
+        msg += '<code class="highlight-me">'+xml+'</code></pre>';
       }
+      //if json
+      else if(options.body.charAt(0) === '{'){
+        json_pp = JSON.parse(options.body);
+        json_pp = JSON.stringify(json_pp, null, '  ');//pd.json(options.body);
+        json_pp = syntaxHighlight(json_pp);
+        msg += json_pp+'</pre>';
+      }
+      //normal w/ headers
+      else{
+        msg += options.body+'</pre>';
+      }
+    }
+    //normal message
+    else{
       msg += '<pre>'+options.body+'</pre>';
     }
-    //Send message to all windows
-    if(options.protocol === 'all') {
-      msg = '<span class="css-streamError">'+options.body+'</span>';
-      $('.js-allstream-error:last-child').html(msg+'<br/>');
-    }
-    else{
-      $('.js-'+options.protocol+'-stream').html(msg+'<br/><span class="js-allstream-error"></span>');
-    }
-    //Scroll Lock
+    return msg;
+  }
+
+  //Lock scroll to bottom if checkbox checked
+  function scrollLock(options) {
+    //scroll lock
     if($('.js-'+options.protocol+'-scroll').attr('checked')){
       $('.js-'+options.protocol+'-stream')[0].scrollTop = $('.js-'+options.protocol+'-stream')[0].scrollHeight;
     }
+  }
+  
+  //Highlight Code block if not highlighted
+  function highlightMsg(options) {
+    //console.log($('.js-'+options.protocol+'-stream .highlight-me'));
+    $('.js-'+options.protocol+'-stream .highlight-me').forEach(function(el) {
+      hljs.highlightBlock(el);
+      $(el).removeClass('highlight-me');
+    });
+  }
+
+  function writeMsg(options) {
+    var msg = '';
+    msg += prepareMsg(options);
+    //Send message to all windows
+    if(options.protocol === 'all') {
+      $('.js-allstream').append(msg+'<br/>');
+    }
+    //Send to just one window
+    else{
+      $('.js-'+options.protocol+'-stream').append(msg+'<br/>');
+    }
+    //Lock the scroll
+    scrollLock(options);
+    highlightMsg(options);
     //Reset values just in case
     options.error = false;
 		options.msg = '';

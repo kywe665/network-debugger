@@ -17,7 +17,9 @@
     "steve": "~0.5.10",
     "socket.io": "~0.9.6",
     "connect": "~2.3.0",
-    "connect_router": "~1.8.6"
+    "connect_router": "~1.8.6",
+    "pretty-data": "~0.30.3",
+    "hljs": "~6.2.3"
   },
   "devDependencies": {},
   "optionalDependencies": {},
