@@ -20,7 +20,6 @@
   //Create Tabs
   uiTabs.create('body', '.js-ui-tab a', '.js-ui-tab', '.js-ui-tab-view', 'http');
   hljs.initHighlightingOnLoad();
-  console.log(hljs);
   //EVENT LISTENERS ALL
   $('.container').on('.js-allstream pre', 'click', function(){
     $(this).toggleClass('css-hl-block');
@@ -87,6 +86,10 @@
   $('.container').on('.js-http-clear', 'click', function(){
     $('.js-http-stream').html('');
   });
+  $('.container').on('.js-http-log', 'click', function(){
+    socket.emit('logHttp');
+    $('.js-http-log').toggleClass('activeLog');
+  });
   $('.container').on('.js-http-scroll', 'change', function(){
     scrollLock({protocol: 'http'});
   });
@@ -132,6 +135,10 @@
   //EVENT LISTENERS UDP
   $('.container').on('.js-udp-clear', 'click', function(){
     $('.js-udp-stream').html('');
+  });
+  $('.container').on('.js-udp-log', 'click', function(){
+    socket.emit('logUdp');
+    $('.js-udp-log').toggleClass('activeLog');
   });
   $('.container').on('.js-udp-scroll', 'change', function(){
     scrollLock({protocol: 'udp'});
@@ -307,7 +314,25 @@
     }
     //normal message
     else{
-      msg += '<pre>'+options.body+'</pre>';
+      if(options.body.substring(0,3) === '<?x'){
+        console.log('im xml!!!');
+        xml_pp = pd.xml(options.body);
+        xml = xml_pp.replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;');
+        console.log({body: options.body, pp: xml_pp, xml: xml});
+        msg += '<pre><code class="highlight-me">'+xml+'</code></pre>';
+      }
+      //if json
+      else if(options.body.charAt(0) === '{'){
+        json_pp = JSON.parse(options.body);
+        json_pp = JSON.stringify(json_pp, null, '  ');
+        json_pp = syntaxHighlight(json_pp);
+        msg += '<pre>'+json_pp+'</pre>';
+      }
+      else{
+        msg += '<pre>'+options.body+'</pre>';
+      }
     }
     return msg;
   }

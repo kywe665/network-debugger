@@ -12,7 +12,11 @@
     , dgram = require('dgram')
     , listener
     , currentTcpPort
+    , currentHttpPort
+    , currentUdpPort
     , tcpBuffer = ''
+    , httpBuffer = ''
+    , udpBuffer = ''
     , browserSocket
     , Socket = require('socket.io')
     , io = Socket.listen(3454)
@@ -37,8 +41,10 @@
     openSockets();
     serverUdp = dgram.createSocket('udp4');
     serverUdp.on("message", function (msg, rinfo) {
-      var message = "server got: " + msg + " from " + rinfo.address + ":" + rinfo.port;
-      console.log(message);
+      var message = msg.toString('utf8'); //+ rinfo.address + ":" + rinfo.port;
+      if(isLoggingUdp){
+        udpBuffer += message + '\r\n\r\n';
+      }
       browserSocket.emit('udpData', {"body": message});
     });
     serverUdp.on("listening", function () {
@@ -54,6 +60,7 @@
       console.log("UDP error: " + e);
     });
     serverUdp.bind(request.params.portNum);
+    currentUdpPort = request.params.portNum;
     response.end();
   }
 
@@ -65,6 +72,7 @@
       .use(getBody)
       .use(readHttp);
     serverHttp = connectObj.listen(request.params.portNum);
+    currentHttpPort = request.params.portNum;
     serverHttp.on('close', function() {
       console.log('HTTP server closed');
       browserSocket.emit('closedConnection', request.params.portNum, 'http');
@@ -98,7 +106,9 @@
       , "body": req.rawBody
       , "protocol": 'http'
     });
-    //browserSocket.send(JSON.stringify(req));
+    if(isLoggingHttp){
+      httpBuffer += (data + req.rawBody + '\r\n\r\n');
+    }
     res.end('Hello from Connect!\n');
   }
 
@@ -147,10 +157,7 @@
       socket.on('testSocket', function() {
         socket.send('Yes, I\'m still here');
       });
-      socket.on('logTcp', function(run) {
-        var date
-          , filename
-          ;
+      socket.on('logTcp', function() {
         if(!isLoggingTcp){
           isLoggingTcp = true;
           console.log('logging tcp Start');
@@ -163,6 +170,40 @@
             writeFile('TCP', tcpBuffer, currentTcpPort, function(){
               tcpBuffer = '';
               console.log('TCP Saved!');
+            });
+          }
+        }
+      });
+      socket.on('logHttp', function() {
+        if(!isLoggingHttp){
+          isLoggingHttp = true;
+          console.log('logging Http Start');
+          mkdir('HTTP', currentHttpPort);
+        }
+        else{
+          isLoggingHttp = false;
+          if(httpBuffer){
+            //write the file
+            writeFile('HTTP', httpBuffer, currentHttpPort, function(){
+              tcpBuffer = '';
+              console.log('HTTP Saved!');
+            });
+          }
+        }
+      });
+      socket.on('logUdp', function() {
+        if(!isLoggingUdp){
+          isLoggingUdp = true;
+          console.log('logging Udp Start');
+          mkdir('UDP', currentUdpPort);
+        }
+        else{
+          isLoggingUdp = false;
+          if(udpBuffer){
+            //write the file
+            writeFile('UDP', udpBuffer, currentUdpPort, function(){
+              tcpBuffer = '';
+              console.log('UDP Saved!');
             });
           }
         }
