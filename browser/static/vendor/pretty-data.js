@@ -340,7 +340,7 @@ pp.prototype.sqlmin = function(text) {
 
 // --------------------------------------------------------------------------------------------
 
-window.pd= new pp;	
+exports.pd= new pp;	
 
 
 

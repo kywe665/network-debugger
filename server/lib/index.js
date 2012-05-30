@@ -11,8 +11,9 @@
     , util = require('util')
     , dgram = require('dgram')
     , listener
+    , currentTcpPort
+    , tcpBuffer = ''
     , browserSocket
-    , currentPort
     , Socket = require('socket.io')
     , io = Socket.listen(3454)
     , socketMap = {}
@@ -24,7 +25,9 @@
     , serverUdp
     , tcpMsg = {}
     , fs = require('fs')
-    , isLogging = false
+    , isLoggingTcp = false
+    , isLoggingHttp = false
+    , isLoggingUdp = false
     ;
 
   connect.router = require('connect_router');
@@ -106,6 +109,7 @@
     startListening(request, response);
   }
   
+  //Browser Comm Sockets
   function openSockets() {
     io.sockets.on('connection', function (socket) {
       console.log('CoNneCtEd socket');
@@ -144,40 +148,75 @@
         socket.send('Yes, I\'m still here');
       });
       socket.on('logTcp', function(run) {
-        if(!isLogging){
-          isLogging = true;
-          console.log('logging Start');
-          fs.mkdir('Log-Files', function (err, data) {
-            if (err){
-              if(err.code === 'EEXIST'){
-                console.log('dir Log-Files exists');
-              }
-              else throw err;
-            }
-          });
-          /*fs.mkdir('./Log-Files/', function (err, data) {
-            if (err){
-              if(err.code === 'EEXIST'){
-                console.log('dir Log-Files exists');
-              }
-              else throw err;
-            }
-          });*/
+        var date
+          , filename
+          ;
+        if(!isLoggingTcp){
+          isLoggingTcp = true;
+          console.log('logging tcp Start');
+          mkdir('TCP', currentTcpPort);
         }
         else{
-          isLogging = false;
-          fs.writeFile('./Log-Files/logger.txt', 'Hello Node', function (err) {
-            if (err) throw err;
-            console.log('It\'s saved!');
-          });
+          isLoggingTcp = false;
+          if(tcpBuffer){
+            //write the file
+            writeFile('TCP', tcpBuffer, currentTcpPort, function(){
+              tcpBuffer = '';
+              console.log('TCP Saved!');
+            });
+          }
         }
       });
     });
   }
+  
+  function writeFile(type, buffer, port, callback) {
+    var date = new Date()
+      , filename
+      ;
+    filename = date.getHours()+'-'+date.getMinutes()+'_'+(date.getMonth()+1)+'-'+date.getDate()+'-'+date.getFullYear();
+    fs.writeFile('./Log-Files/'+type+'/'+port+'/'+filename+'.txt', buffer
+    , function (err) {
+        if (err) throw err;
+        callback();
+      })
+    ;
+  }
+  
+  //Make directory for logger
+  function mkdir(type, port) {
+    fs.mkdir('Log-Files', function (err, data) {
+      if (err){
+        if(err.code === 'EEXIST'){
+          console.log('dir Log-Files exists');
+        }
+        else throw err;
+      }
+      fs.mkdir('./Log-Files/'+type, function (err, data) {
+        if (err){
+          if(err.code === 'EEXIST'){
+            console.log('dir '+type+' exists');
+          }
+          else throw err;
+        }
+        fs.mkdir('./Log-Files/'+type+'/'+port, function (err, data) {
+          if (err){
+            if(err.code === 'EEXIST'){
+              console.log('dir '+port+' exists');
+            }
+            else throw err;
+          }
+        });
+      });
+    });
+  } 
 
   //Open Sockets to listen on network TCP
   function startListening (request, response) {
-    var success = {};
+    var success = {}
+      , date
+      , filename
+      ;
     success.socket = true;
     console.log('starting connection');
     listener = net.createServer(function(listenSocket) { //'connection' listener      
@@ -205,12 +244,15 @@
       //Event when data is transferred
       listenSocket.on('data', function(data) {
         tcpMsg[listenSocket.id] += (data.toString());
+        if(isLoggingTcp){
+          tcpBuffer += (data.toString() + '\r\n\r\n');
+        }
       });
     });
     //bind the server to listen to the requested port
     listener.listen(request.params.portNum, function() { //'listening' listener
       console.log('server bound to '+ request.params.portNum);
-      currentPort = request.params.portNum;
+      currentTcpPort = request.params.portNum;
       success.listening = true;
       response.json(success);
       response.end();
@@ -238,7 +280,7 @@
       socketMap[socket].destroy();
     });
     listener.close();
-    browserSocket.emit('closedConnection', currentPort, 'tcp');
+    browserSocket.emit('closedConnection', currentTcpPort, 'tcp');
   }
 
   function router(rest) {

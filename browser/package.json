@@ -19,7 +19,8 @@
     "bean": "0.4.x",
     "domready": "0.2.x",
     "url": "*",
-    "socket.io-browser": "*"
+    "socket.io-browser": "*",
+    "pretty-data": "*"
   },
   "dependencies": {},
   "devDependencies": {},

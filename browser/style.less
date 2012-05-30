@@ -156,12 +156,20 @@ body{
     box-shadow: 0px 4px 12px -7px red; 
   }
   pre{
+    -webkit-transition-property: background, border, padding;
+    -webkit-transition-duration: .2s, .1s, .1s;
     margin: 0;
     .string { color: lightGreen; }
     .number { color: lightYellow; }
     .boolean { color: lightSkyBlue; }
     .null { color: plum; }
     .key { color: lightSalmon; }
+    &.css-hl-block{
+      background: #333;
+      border: 2px groove #FFC925;
+      padding: 8px;
+      cursor: pointer;
+    }
   }
 }
 

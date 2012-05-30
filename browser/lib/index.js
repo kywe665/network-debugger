@@ -15,12 +15,16 @@
     , io = require('socket.io-browser')
     , socket
     , hljs = require('hljs')
-    , pd = require('pd')
+    , pd = require('pretty-data')
     ;
   //Create Tabs
   uiTabs.create('body', '.js-ui-tab a', '.js-ui-tab', '.js-ui-tab-view', 'http');
   hljs.initHighlightingOnLoad();
   console.log(hljs);
+  //EVENT LISTENERS ALL
+  $('.container').on('.js-allstream pre', 'click', function(){
+    $(this).toggleClass('css-hl-block');
+  });
 
   //EVENT LISTENERS TCP
   $('.container').on('.js-tcp-log', 'click', function(){
