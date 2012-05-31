@@ -14,15 +14,13 @@
     , uiTabs = require('./ui-tabs')
     , io = require('socket.io-browser')
     , socket
-    , hljs = require('hljs')
     , pd = require('pretty-data').pd
     , pure = require('./pure-inject')
+    , visual = require('./visual')
     ;
 
-  //Create Tabs
   uiTabs.create('body', '.js-ui-tab a', '.js-ui-tab', '.js-ui-tab-view', 'http');
-  hljs.initHighlightingOnLoad();
-  //EVENT LISTENERS ALL
+  
   $('.container').on('.js-allstream pre', 'click', function(){
     $(this).toggleClass('css-hl-block');
   });
@@ -38,46 +36,11 @@
   $('.container').on('.js-tcp-scroll', 'change', function(){
     scrollLock({protocol: 'tcp'});
   });
-  $('.container').on('.js-tcp-testSocket', 'click', function(){
-    socket.emit('testSocket');
-  });
   $('.container').on('.js-tcp-closeSocket:not(.inactive)', 'click', function(){
     socket.emit('allDone');
   });
   $('.container').on('.js-tcp-openSocket:not(.inactive)', 'click', function(){
-    var options = {}
-      , port = $('.js-tcp-portNum').val()
-      ;
-    options.body = '';
-    options.protocol = 'tcp';
-    reqwest({
-      url: 'http://'+window.location.host+'/listenTCP/'+port
-    , type: 'json'
-    , method: 'get'
-    , error: function (err) { 
-        console.log('Server Error: ', err);
-        options.body = 'Cannot communicate with netbug server';
-        options.cssClass = 'css-streamError';
-        injectMessage(options);
-      }
-    , success: function (resp) {
-        var i;
-        if(!resp.error){
-          options.active = true;
-          stateChange(options);
-          options.body += 'TCP Socket opened succesfully. Listening on port: '+ port;
-          options.cssClass = 'css-streamNewConnection';
-        }
-        else{
-          options.cssClass = 'css-streamError';
-          for(i=0; i < resp.errors.length; i=i+1){
-						options.body += resp.errors[i].message;
-					}
-        }
-        injectMessage(options);
-      }
-    });
-    openSocket(options);
+    makeRequest('tcp');
 	});
   //EVENT LISTENERS HTTP
   $('.container').on('.js-http-clear', 'click', function(){
@@ -96,41 +59,8 @@
   $('.container').on('.js-http-closeSocket:not(.inactive)', 'click', function(){
     socket.emit('killHttp');
   });
-  $('.container').on('.js-http-openSocket:not(.inactive)', 'click', function(){
-     var options = {}
-      , port = $('.js-http-portNum').val()
-      ;
-    options.body = '';
-    options.protocol = 'http';
-    reqwest({
-      url: 'http://'+window.location.host+'/listenHTTP/'+port
-    , type: 'json'
-    , method: 'get'
-    , error: function (err) { 
-        console.log('Server Error: ', err);
-        options.body = 'Cannot communicate with netbug server';
-        options.cssClass = 'css-streamError';
-        injectMessage(options);
-      }
-    , success: function (resp) {
-        var html, i;
-        console.log('success: ', resp);
-        if(!resp.error){
-          options.active = true;
-          stateChange(options);
-          options.body += 'HTTP Socket opened succesfully. Listening on port: '+ port;
-          options.cssClass = 'css-streamNewConnection';
-        }
-        else{
-          options.cssClass = 'css-streamError';
-          for(i=0; i < resp.errors.length; i=i+1){
-						options.body += resp.errors[i].message;
-					}
-        }
-        injectMessage(options);
-      }
-    });
-    openSocket(options);
+  $('.container').on('.js-http-openSocket:not(.inactive)', 'click', function(){ 
+    makeRequest('http');
   });
   //EVENT LISTENERS UDP
   $('.container').on('.js-udp-clear', 'click', function(){
@@ -147,13 +77,17 @@
     socket.emit('killUdp');
   });
   $('.container').on('.js-udp-openSocket:not(.inactive)', 'click', function(){
-     var options = {}
-      , port = $('.js-udp-portNum').val()
+     makeRequest('udp');
+  });
+  
+  function makeRequest(protocol) {
+    var options = {}
+      , port = $('.js-'+protocol+'-portNum').val()
       ;
     options.body = '';
-    options.protocol = 'udp';
+    options.protocol = protocol;
     reqwest({
-      url: 'http://'+window.location.host+'/listenUDP/'+port
+      url: 'http://'+window.location.host+'/listen'+protocol+'/'+port
     , type: 'json'
     , method: 'get'
     , error: function (err) { 
@@ -167,8 +101,8 @@
         console.log('success: ', resp);
         if(!resp.error){
           options.active = true;
-          stateChange(options);
-          options.body += 'UDP Socket opened succesfully. Listening on port: '+ port;
+          visual.stateChange(options);
+          options.body += 'Socket opened succesfully. Listening on port: '+ port;
           options.cssClass = 'css-streamNewConnection';
         }
         else{
@@ -181,7 +115,7 @@
       }
     });
     openSocket(options);
-  });
+  }
  
 //SOCKET COMMUNICATION WITH SERVER 
   function openSocket(options) {
@@ -219,7 +153,7 @@
       socket.on('closedConnection', function(num, protocol){
         options.body = 'Closed Connection on '+num;
         options.cssClass = 'css-streamCloseConnection';
-        stateChange({
+        visual.stateChange({
           active: false,
           protocol: protocol
         });
@@ -233,67 +167,15 @@
         options.protocol = 'all';
         injectMessage(options);
         options.active = false;
-        stateChange(options);
+        visual.stateChange(options);
       });
     });
   }
 
-  function stateChange(options){
-    if(options.protocol === 'all'){
-      stateChange({protocol:'tcp'});
-      stateChange({protocol:'http'});
-      stateChange({protocol:'udp'});
-    }
-    else{
-      if(options.active){
-        $('.js-'+options.protocol+'-openSocket').addClass('inactive');
-        $('.js-'+options.protocol+'-closeSocket').removeClass('inactive');
-        $('.js-'+options.protocol+'-connection-status').removeClass('off');
-        $('.js-'+options.protocol+'-connection-count').html('0');
-      }
-      else{
-        $('.js-'+options.protocol+'-openSocket').removeClass('inactive');
-        $('.js-'+options.protocol+'-closeSocket').addClass('inactive');
-        $('.js-'+options.protocol+'-connection-status').addClass('off');
-        $('.js-'+options.protocol+'-connection-count').html('0');
-      }
-    }
-  }
-  function syntaxHighlight(json) {
-    json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-    return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g
-    , function (match) {
-        var cls = 'number';
-        if (/^"/.test(match)) {
-            if (/:$/.test(match)) {
-                cls = 'key';
-            } else {
-                cls = 'string';
-            }
-        } else if (/true|false/.test(match)) {
-            cls = 'boolean';
-        } else if (/null/.test(match)) {
-            cls = 'null';
-        }
-        return '<span class="' + cls + '">' + match + '</span>';
-    });
-  }
-
-  //Lock scroll to bottom if checkbox checked
   function scrollLock(options) {
-    //scroll lock
     if($('.js-'+options.protocol+'-scroll').attr('checked')){
       $('.js-'+options.protocol+'-stream')[0].scrollTop = $('.js-'+options.protocol+'-stream')[0].scrollHeight;
     }
-  }
-  
-  //Highlight Code block if not highlighted
-  function highlightMsg(options) {
-    //console.log($('.js-'+options.protocol+'-stream .highlight-me'));
-    $('.js-'+options.protocol+'-stream .highlight-me').forEach(function(el) {
-      hljs.highlightBlock(el);
-      $(el).removeClass('highlight-me');
-    });
   }
 
   function injectMessage(options) {
@@ -311,7 +193,7 @@
     pure.injectCode(protocol, data);
     options.protocol = protocol;
     scrollLock(options);
-    highlightMsg(options);
+    visual.highlightMsg(options);
   }
   
   function processBody(options, data) {
@@ -331,17 +213,13 @@
     //if json
     else if(options.body.charAt(0) === '{'){
       json_pp = JSON.parse(options.body);
-      json_pp = JSON.stringify(json_pp, null, '  ');//pd.json(options.body);
-      json_pp = syntaxHighlight(json_pp);
+      json_pp = JSON.stringify(json_pp, null, '  ');
+      json_pp = visual.syntaxHighlight(json_pp);
       data.code += json_pp;
     }
-    //normal w/ headers
     else{
       data.code += options.body;
     }
     return data;
   }
-
 }());
-
-

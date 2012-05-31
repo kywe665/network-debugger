@@ -325,9 +325,9 @@
     }
 
     function router(rest) {
-      rest.get('/listenTCP/:portNum', listenTcp);
-      rest.get('/listenHTTP/:portNum', listenHttp);
-      rest.get('/listenUDP/:portNum', listenUdp);
+      rest.get('/listentcp/:portNum', listenTcp);
+      rest.get('/listenhttp/:portNum', listenHttp);
+      rest.get('/listenudp/:portNum', listenUdp);
     }
 
     app.use(connect.favicon());
