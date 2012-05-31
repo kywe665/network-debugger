@@ -21,37 +21,34 @@
 
   uiTabs.create('body', '.js-ui-tab a', '.js-ui-tab', '.js-ui-tab-view', 'http');
   
-  $('.container').on('.js-allstream pre', 'click', function(){
+  //EVENT LISTENERS ALL
+  $('.container').on('.js-all-stream pre', 'click', function(){
     $(this).toggleClass('css-hl-block');
+  });
+  $('.container').on('.js-openSocket:not(.inactive)', 'click', function(){
+    makeRequest($(this).attr('data-protocol'));
+	});
+  $('.container').on('.js-scroll', 'change', function(){
+    scrollLock({protocol: $(this).attr('data-protocol')});
+  });
+  $('.container').on('.js-clear', 'click', function(){
+    $('.js-'+$(this).attr('data-protocol')+'-stream').html('');
+  });
+  $('.container').on('.js-log', 'click', function(){
+    socket.emit('log' + $(this).attr('data-protocol'));
+    $('.js-log.js-' + $(this).attr('data-protocol')).toggleClass('activeLog');
   });
 
   //EVENT LISTENERS TCP
-  $('.container').on('.js-tcp-log', 'click', function(){
-    socket.emit('logTcp');
-    $('.js-tcp-log').toggleClass('activeLog');
-  });
-  $('.container').on('.js-tcp-clear', 'click', function(){
-    $('.js-tcp-stream').html('');
-  });
-  $('.container').on('.js-tcp-scroll', 'change', function(){
-    scrollLock({protocol: 'tcp'});
-  });
+  
   $('.container').on('.js-tcp-closeSocket:not(.inactive)', 'click', function(){
     socket.emit('allDone');
   });
-  $('.container').on('.js-tcp-openSocket:not(.inactive)', 'click', function(){
-    makeRequest('tcp');
-	});
+  
   //EVENT LISTENERS HTTP
-  $('.container').on('.js-http-clear', 'click', function(){
-    $('.js-http-stream').html('');
-  });
   $('.container').on('.js-http-log', 'click', function(){
     socket.emit('logHttp');
     $('.js-http-log').toggleClass('activeLog');
-  });
-  $('.container').on('.js-http-scroll', 'change', function(){
-    scrollLock({protocol: 'http'});
   });
   $('.container').on('.js-include-headers', 'change', function(){
     socket.emit('includeHeaders', $('.js-include-headers').attr('checked'));
@@ -59,25 +56,13 @@
   $('.container').on('.js-http-closeSocket:not(.inactive)', 'click', function(){
     socket.emit('killHttp');
   });
-  $('.container').on('.js-http-openSocket:not(.inactive)', 'click', function(){ 
-    makeRequest('http');
-  });
   //EVENT LISTENERS UDP
-  $('.container').on('.js-udp-clear', 'click', function(){
-    $('.js-udp-stream').html('');
-  });
   $('.container').on('.js-udp-log', 'click', function(){
     socket.emit('logUdp');
     $('.js-udp-log').toggleClass('activeLog');
   });
-  $('.container').on('.js-udp-scroll', 'change', function(){
-    scrollLock({protocol: 'udp'});
-  });
   $('.container').on('.js-udp-closeSocket:not(.inactive)', 'click', function(){
     socket.emit('killUdp');
-  });
-  $('.container').on('.js-udp-openSocket:not(.inactive)', 'click', function(){
-     makeRequest('udp');
   });
   
   function makeRequest(protocol) {
@@ -173,7 +158,7 @@
   }
 
   function scrollLock(options) {
-    if($('.js-'+options.protocol+'-scroll').attr('checked')){
+    if($('.js-scroll.js-'+options.protocol).attr('checked')){
       $('.js-'+options.protocol+'-stream')[0].scrollTop = $('.js-'+options.protocol+'-stream')[0].scrollHeight;
     }
   }

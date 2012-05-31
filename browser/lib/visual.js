@@ -14,13 +14,13 @@
     }
     else{
       if(options.active){
-        $('.js-'+options.protocol+'-openSocket').addClass('inactive');
+        $('.js-openSocket.js-'+options.protocol).addClass('inactive');
         $('.js-'+options.protocol+'-closeSocket').removeClass('inactive');
         $('.js-'+options.protocol+'-connection-status').removeClass('off');
         $('.js-'+options.protocol+'-connection-count').html('0');
       }
       else{
-        $('.js-'+options.protocol+'-openSocket').removeClass('inactive');
+        $('.js-openSocket.js-'+options.protocol).removeClass('inactive');
         $('.js-'+options.protocol+'-closeSocket').addClass('inactive');
         $('.js-'+options.protocol+'-connection-status').addClass('off');
         $('.js-'+options.protocol+'-connection-count').html('0');
