@@ -103,6 +103,7 @@
         data += key + ': ' + req.headers[key] + '\r\n';
       });
       data += '\r\n';
+
       browserSocket.emit('httpData', {
           "headers": data
         , "body": req.rawBody

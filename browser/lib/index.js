@@ -16,7 +16,9 @@
     , socket
     , hljs = require('hljs')
     , pd = require('pretty-data').pd
+    , pure = require('./pure-inject')
     ;
+
   //Create Tabs
   uiTabs.create('body', '.js-ui-tab a', '.js-ui-tab', '.js-ui-tab-view', 'http');
   hljs.initHighlightingOnLoad();
@@ -54,30 +56,25 @@
     , method: 'get'
     , error: function (err) { 
         console.log('Server Error: ', err);
-        options.error = true;
         options.body = 'Cannot communicate with netbug server';
-        writeMsg(options);
+        options.cssClass = 'css-streamError';
+        injectMessage(options);
       }
     , success: function (resp) {
-        var html, i;
-        console.log('success: ', resp);
+        var i;
         if(!resp.error){
           options.active = true;
           stateChange(options);
-          if(resp.result.socket){
-            options.body += '<span class="css-streamNewConnection">TCP Socket opened succesfully. ';
-          }
-          if(resp.result.listening){
-            options.body += 'Listening on port: '+ port +' </span>';
-          }
+          options.body += 'TCP Socket opened succesfully. Listening on port: '+ port;
+          options.cssClass = 'css-streamNewConnection';
         }
         else{
-          options.error = true;
+          options.cssClass = 'css-streamError';
           for(i=0; i < resp.errors.length; i=i+1){
 						options.body += resp.errors[i].message;
 					}
         }
-        writeMsg(options);
+        injectMessage(options);
       }
     });
     openSocket(options);
@@ -111,9 +108,9 @@
     , method: 'get'
     , error: function (err) { 
         console.log('Server Error: ', err);
-        options.error = true;
         options.body = 'Cannot communicate with netbug server';
-        writeMsg(options);
+        options.cssClass = 'css-streamError';
+        injectMessage(options);
       }
     , success: function (resp) {
         var html, i;
@@ -121,16 +118,16 @@
         if(!resp.error){
           options.active = true;
           stateChange(options);
-          options.body += '<span class="css-streamNewConnection">HTTP Socket opened succesfully. ';
-          options.body += 'Listening on port: '+ port +' </span>';
+          options.body += 'HTTP Socket opened succesfully. Listening on port: '+ port;
+          options.cssClass = 'css-streamNewConnection';
         }
         else{
-          options.error = true;
+          options.cssClass = 'css-streamError';
           for(i=0; i < resp.errors.length; i=i+1){
 						options.body += resp.errors[i].message;
 					}
         }
-        writeMsg(options);
+        injectMessage(options);
       }
     });
     openSocket(options);
@@ -161,9 +158,9 @@
     , method: 'get'
     , error: function (err) { 
         console.log('Server Error: ', err);
-        options.error = true;
         options.body = 'Cannot communicate with netbug server';
-        writeMsg(options);
+        options.cssClass = 'css-streamError';
+        injectMessage(options);
       }
     , success: function (resp) {
         var html, i;
@@ -171,16 +168,16 @@
         if(!resp.error){
           options.active = true;
           stateChange(options);
-          options.body += '<span class="css-streamNewConnection">UDP Socket opened succesfully. ';
-          options.body += 'Listening on port: '+ port +' </span>';
+          options.body += 'UDP Socket opened succesfully. Listening on port: '+ port;
+          options.cssClass = 'css-streamNewConnection';
         }
         else{
-          options.error = true;
+          options.cssClass = 'css-streamError';
           for(i=0; i < resp.errors.length; i=i+1){
 						options.body += resp.errors[i].message;
 					}
         }
-        writeMsg(options);
+        injectMessage(options);
       }
     });
     openSocket(options);
@@ -193,51 +190,48 @@
       socket.send('hi');
       socket.on('message', function (msg) {
         options.body = msg;
-        options.protocol = 'tcp';
-        writeMsg(options);
+        injectCode('tcp', options);
       });
       socket.on('httpData', function (msg) {
-        writeMsg(msg);
+        injectCode('http', msg);
       });
       socket.on('udpData', function (msg) {
-        msg.protocol = 'udp';
-        writeMsg(msg);
+        injectCode('udp', msg);
       });
       socket.on('seperateFiles', function (protocol) {
-        console.log('trywrite');
-        console.log($('.js-'+protocol+'-multifile'));
         if($('.js-'+protocol+'-multifile').attr('checked')) {
-          console.log('goWrite');
           socket.emit('writeFile', protocol);
         }
       });
       socket.on('connectionChange', function (count, closed) {
         $('.js-tcp-connection-count').html(count);
         if(closed){
-          options.body = '<span class="css-streamCloseConnection">Socket Closed</span>';
+          options.body = 'Socket Closed';
+          options.cssClass = 'css-streamCloseConnection';
         }
         else{
-          options.body = '<span class="css-streamNewConnection">New Socket Opened</span>';
+          options.body = 'New Socket Opened';
+          options.cssClass = 'css-streamNewConnection';
         }
         options.protocol = 'tcp';
-        writeMsg(options);
-        
+        injectMessage(options);
       });
       socket.on('closedConnection', function(num, protocol){
-        options.body = '<span class="css-streamCloseConnection">Closed Connection on '+num+'</span>';
+        options.body = 'Closed Connection on '+num;
+        options.cssClass = 'css-streamCloseConnection';
         stateChange({
           active: false,
           protocol: protocol
         });
         options.protocol = protocol;
-        writeMsg(options);
+        injectMessage(options);
       });
       socket.on('disconnect', function () { 
         console.log('Browser-Disconnected socket');
-        options.error = true;
+        options.cssClass = 'css-streamError';
         options.body = 'NetBug Server Down';
         options.protocol = 'all';
-        writeMsg(options);
+        injectMessage(options);
         options.active = false;
         stateChange(options);
       });
@@ -285,69 +279,6 @@
     });
   }
 
-  function prepareMsg(options) {
-    var timeStamp = new Date()
-      , msg = ''
-      , xml
-      , xml_pp
-      , json_pp
-      ;
-    msg += '<span class="css-streamTime">'+timeStamp.toString()+'</span><br/>';
-    //prepare error message
-    if (options.error || options.protocol === 'all'){
-      msg += '<span class="css-streamError">'+options.body+'</span>';
-      return msg;
-    }
-    //prepare normal message w/ headers
-    if(options.headers){
-      msg += '<pre>'+options.headers;
-      //if xml
-      if(options.body.substring(0,3) === '<?x'){
-        console.log('im xml!!!');
-        xml_pp = pd.xml(options.body);
-        xml = xml_pp.replace(/&/g, '&amp;')
-                    .replace(/</g, '&lt;')
-                    .replace(/>/g, '&gt;');
-        console.log({body: options.body, pp: xml_pp, xml: xml});
-        msg += '<code class="highlight-me">'+xml+'</code></pre>';
-      }
-      //if json
-      else if(options.body.charAt(0) === '{'){
-        json_pp = JSON.parse(options.body);
-        json_pp = JSON.stringify(json_pp, null, '  ');//pd.json(options.body);
-        json_pp = syntaxHighlight(json_pp);
-        msg += json_pp+'</pre>';
-      }
-      //normal w/ headers
-      else{
-        msg += options.body+'</pre>';
-      }
-    }
-    //normal message
-    else{
-      if(options.body.substring(0,3) === '<?x'){
-        console.log('im xml!!!');
-        xml_pp = pd.xml(options.body);
-        xml = xml_pp.replace(/&/g, '&amp;')
-                    .replace(/</g, '&lt;')
-                    .replace(/>/g, '&gt;');
-        console.log({body: options.body, pp: xml_pp, xml: xml});
-        msg += '<pre><code class="highlight-me">'+xml+'</code></pre>';
-      }
-      //if json
-      else if(options.body.charAt(0) === '{'){
-        json_pp = JSON.parse(options.body);
-        json_pp = JSON.stringify(json_pp, null, '  ');
-        json_pp = syntaxHighlight(json_pp);
-        msg += '<pre>'+json_pp+'</pre>';
-      }
-      else{
-        msg += '<pre>'+options.body+'</pre>';
-      }
-    }
-    return msg;
-  }
-
   //Lock scroll to bottom if checkbox checked
   function scrollLock(options) {
     //scroll lock
@@ -365,30 +296,52 @@
     });
   }
 
-  function writeMsg(options) {
-    var msg = '';
-    msg += prepareMsg(options);
-    //Send message to all windows
-    if(options.protocol === 'all') {
-      $('.js-allstream').append(msg+'<br/>');
-    }
-    //Send to just one window
-    else{
-      $('.js-'+options.protocol+'-stream').append(msg+'<br/>');
-    }
-    //Lock the scroll
+  function injectMessage(options) {
+    pure.injectMessage(options.protocol, {
+      'message': options.body,
+      'class': options.cssClass
+    });
+    scrollLock(options);
+  }
+
+  function injectCode(protocol, options) {
+    var data = {};      
+    data.code = options.headers || '';
+    data = processBody(options, data);
+    pure.injectCode(protocol, data);
+    options.protocol = protocol;
     scrollLock(options);
     highlightMsg(options);
-    //Reset values just in case
-    options.error = false;
-		options.msg = '';
-  }
-
-  function init() {
-
   }
   
-   module.exports.init = init;
+  function processBody(options, data) {
+    var xml
+      , xml_pp
+      , json_pp
+      ;
+    //if xml
+    if(options.body.substring(0,3) === '<?x'){
+      console.log('im xml!!!');
+      xml_pp = pd.xml(options.body);
+      xml = xml_pp.replace(/&/g, '&amp;')
+                  .replace(/</g, '&lt;')
+                  .replace(/>/g, '&gt;');
+      data.xml = xml;
+    }
+    //if json
+    else if(options.body.charAt(0) === '{'){
+      json_pp = JSON.parse(options.body);
+      json_pp = JSON.stringify(json_pp, null, '  ');//pd.json(options.body);
+      json_pp = syntaxHighlight(json_pp);
+      data.code += json_pp;
+    }
+    //normal w/ headers
+    else{
+      data.code += options.body;
+    }
+    return data;
+  }
+
 }());
 
 
