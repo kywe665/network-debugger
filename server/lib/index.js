@@ -148,15 +148,15 @@
             serverHttp.close();
           }*/
         });
-        socket.on('allDone', function () {
+        socket.on('killtcp', function () {
           console.log('all done');
           closeAllSockets();
         });
-        socket.on('killHttp', function () {
+        socket.on('killhttp', function () {
           console.log('killHttp');
           serverHttp.close();
         });
-        socket.on('killUdp', function () {
+        socket.on('killudp', function () {
           console.log('killUdp');
           serverUdp.close();
         });
@@ -178,7 +178,7 @@
         socket.on('includeHeaders', function (bool) { 
           includeHeaders = bool;
         });
-        socket.on('logTcp', function() {
+        socket.on('logtcp', function() {
           if(!isLoggingTcp){
             isLoggingTcp = true;
             console.log('logging tcp Start');
@@ -195,7 +195,7 @@
             }
           }
         });
-        socket.on('logHttp', function() {
+        socket.on('loghttp', function() {
           if(!isLoggingHttp){
             isLoggingHttp = true;
             console.log('logging Http Start');
@@ -212,7 +212,7 @@
             }
           }
         });
-        socket.on('logUdp', function() {
+        socket.on('logudp', function() {
           if(!isLoggingUdp){
             isLoggingUdp = true;
             console.log('logging Udp Start');

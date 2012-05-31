@@ -34,7 +34,7 @@ html(lang='en')
             .js-tcp-stream.js-all-stream.css-stream
               span.js-allstream-error
             div.css-left.css-bottom
-              a.css-button.js-tcp-closeSocket.inactive Close Connection
+              a.css-button.js-closeSocket.js-tcp.inactive(data-protocol='tcp') Close Connection
             div.css-center.css-bottom
               a.css-button.js-clear.js-tcp(data-protocol='tcp') Clear
             div.css-right.css-bottom
@@ -58,7 +58,7 @@ html(lang='en')
             .js-http-stream.js-all-stream.css-stream
               span.js-allstream-error
             div.css-left.css-bottom
-              a.css-button.js-http-closeSocket.inactive Close Connection
+              a.css-button.js-closeSocket.js-http.inactive(data-protocol='http') Close Connection
             div.css-center.css-bottom
               a.css-button.js-clear.js-http(data-protocol='http') Clear
             div.css-right.css-bottom
@@ -79,7 +79,7 @@ html(lang='en')
             .js-udp-stream.js-all-stream.css-stream
               span.js-allstream-error
             div.css-left.css-bottom
-              a.css-button.js-udp-closeSocket.inactive Close Connection
+              a.css-button.js-closeSocket.js-udp.inactive(data-protocol='udp') Close Connection
             div.css-center.css-bottom
               a.css-button.js-clear.js-udp(data-protocol='udp') Clear
             div.css-right.css-bottom
@@ -96,6 +96,5 @@ html(lang='en')
           span
           code.highlight-me
 
-//script(src="./vendor/pure.js")
 script(src='./vendor/highlight.pack.js', type='text/javascript')
 script(src='pakmanaged.js', type='text/javascript')

@@ -38,31 +38,13 @@
     socket.emit('log' + $(this).attr('data-protocol'));
     $('.js-log.js-' + $(this).attr('data-protocol')).toggleClass('activeLog');
   });
+  $('.container').on('.js-closeSocket:not(.inactive)', 'click', function(){
+    socket.emit('kill' + $(this).attr('data-protocol'));
+  });
 
-  //EVENT LISTENERS TCP
-  
-  $('.container').on('.js-tcp-closeSocket:not(.inactive)', 'click', function(){
-    socket.emit('allDone');
-  });
-  
   //EVENT LISTENERS HTTP
-  $('.container').on('.js-http-log', 'click', function(){
-    socket.emit('logHttp');
-    $('.js-http-log').toggleClass('activeLog');
-  });
   $('.container').on('.js-include-headers', 'change', function(){
     socket.emit('includeHeaders', $('.js-include-headers').attr('checked'));
-  });
-  $('.container').on('.js-http-closeSocket:not(.inactive)', 'click', function(){
-    socket.emit('killHttp');
-  });
-  //EVENT LISTENERS UDP
-  $('.container').on('.js-udp-log', 'click', function(){
-    socket.emit('logUdp');
-    $('.js-udp-log').toggleClass('activeLog');
-  });
-  $('.container').on('.js-udp-closeSocket:not(.inactive)', 'click', function(){
-    socket.emit('killUdp');
   });
   
   function makeRequest(protocol) {

@@ -15,13 +15,13 @@
     else{
       if(options.active){
         $('.js-openSocket.js-'+options.protocol).addClass('inactive');
-        $('.js-'+options.protocol+'-closeSocket').removeClass('inactive');
+        $('.js-closeSocket.js-'+options.protocol).removeClass('inactive');
         $('.js-'+options.protocol+'-connection-status').removeClass('off');
         $('.js-'+options.protocol+'-connection-count').html('0');
       }
       else{
         $('.js-openSocket.js-'+options.protocol).removeClass('inactive');
-        $('.js-'+options.protocol+'-closeSocket').addClass('inactive');
+        $('.js-closeSocket.js-'+options.protocol).addClass('inactive');
         $('.js-'+options.protocol+'-connection-status').addClass('off');
         $('.js-'+options.protocol+'-connection-count').html('0');
       }
