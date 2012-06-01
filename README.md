@@ -10,10 +10,10 @@ Install with [npm](http://github.com/isaacs/npm):
 
 ## Run
 
-netbug-server (port #) [directory to save logs]
+    netbug-server (port #) [directory to save logs]
     
 ex:
 
-netbug-server 1234 log-files
+    netbug-server 1234 log-files
 
 ####Now open your browser to http://localhost:1234
