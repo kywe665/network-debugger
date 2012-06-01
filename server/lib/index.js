@@ -27,7 +27,8 @@
     , serverHttp
     , serverUdp
     , tcpMsg = {}
-    , fs = require('fs.extra')
+    , fs = require('fs')
+    , mkdirp = require('mkdirp')
     , path = require('path')
     , isLoggingTcp = false
     , isLoggingHttp = false
@@ -237,17 +238,19 @@
         , filename
         ;
       filename = date.getHours()+'-'+date.getMinutes()+'-'+date.getSeconds()+'_'+(date.getMonth()+1)+'-'+date.getDate()+'-'+date.getFullYear();
-      fs.writeFile(path.join(logpath, protocol, port, filename+'.txt'), buffer
+      console.log(buffer);
+      fs.writeFile(path.join(logpath, protocol, port, filename+'.kml'), buffer
       , function (err) {
+          httpBuffer = '';
           if (err) throw err;
-          callback();
         })
       ;
+      
     }
     
     //Make directory for logger
     function mkdir(protocol, port) {
-      fs.mkdirp(path.join(logpath, protocol, port));
+      mkdirp(path.join(logpath, protocol, port));
     } 
 
     //Open Sockets to listen on network TCP
