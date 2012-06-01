@@ -19,7 +19,6 @@
     serverHttp = connectObj.listen(request.params.portNum);
     currentHttpPort = request.params.portNum;
     serverHttp.on('close', function() {
-      console.log('HTTP server closed');
       browserSocket.emit('closedConnection', request.params.portNum, 'http');
     });
     response.end();
@@ -70,7 +69,6 @@
   function toggleLog(logpath) {
     if(!isLoggingHttp){
       isLoggingHttp = true;
-      console.log('logging http Start');
       file.mkdir('http', currentHttpPort, logpath);
     }
     else{

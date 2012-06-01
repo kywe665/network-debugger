@@ -47,6 +47,9 @@
     $('.js-log.activeLog.js-'+$(this).attr('data-protocol')).trigger('click');
     socket.emit('kill' + $(this).attr('data-protocol'));
   });
+   $('.container').on('.js-ui-tab', 'click', function(){
+    setTimeout( scrollLock({protocol: $(this).attr('data-protocol')}), 100 );
+  });
 
   //EVENT LISTENERS HTTP
   $('.container').on('.js-include-headers', 'change', function(){
@@ -147,6 +150,7 @@
 
   function scrollLock(options) {
     if($('.js-scroll.js-'+options.protocol).attr('checked')){
+      console.log('lock');
       $('.js-'+options.protocol+'-stream')[0].scrollTop = $('.js-'+options.protocol+'-stream')[0].scrollHeight;
     }
   }

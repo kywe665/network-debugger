@@ -2,7 +2,7 @@
   "author": "Kyle Weller <kywe665@gmail.com>",
   "name": "netbug",
   "description": "Network Debugger",
-  "version": "1.2.5",
+  "version": "1.2.6",
   "repository": {
     "type": "git",
     "url": "git://github.com/kywe665/network-debugger.git"
@@ -18,7 +18,8 @@
     "socket.io": "~0.9.6",
     "connect_router": "~1.8.6",
     "pretty-data": "~0.30.3",
-    "hljs": "~6.2.3"
+    "hljs": "~6.2.3",
+    "mkdirp": "~0.3.2"
   },
   "devDependencies": {},
   "optionalDependencies": {},

@@ -23,11 +23,8 @@
     });
     serverUdp.on("listening", function () {
       var address = serverUdp.address();
-      console.log("server listening " +
-          address.address + ":" + address.port);
     });
     serverUdp.on("close", function () {
-      console.log("UDP CLOSED: ");
       browserSocket.emit('closedConnection', request.params.portNum, 'udp');
     });
     serverUdp.on("error", function (e) {
@@ -39,13 +36,12 @@
   }
 
   function writeFile(logpath){
-    file.writeFile('http', udpBuffer, currentUdpPort, logpath, function(){udpBuffer = '';});
+    file.writeFile('udp', udpBuffer, currentUdpPort, logpath, function(){udpBuffer = '';});
   }
 
   function toggleLog(logpath) {
     if(!isLoggingUdp){
       isLoggingUdp = true;
-      console.log('logging udp Start');
       file.mkdir('udp', currentUdpPort, logpath);
     }
     else{

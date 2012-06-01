@@ -8,7 +8,11 @@
   function writeFile(protocol, buffer, port, logpath, callback) {
     var date = new Date()
       , filename
+      , ext = '.txt'
       ;
+    if(buffer.indexOf("<kml") != -1){
+      ext = '.kml';
+    }
     filename = date.getHours()+'-'+date.getMinutes()+'-'+date.getSeconds()+'_'+(date.getMonth()+1)+'-'+date.getDate()+'-'+date.getFullYear();
     fs.writeFile(path.join(logpath, protocol, port, filename+'.txt'), buffer
     , function (err) {

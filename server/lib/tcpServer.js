@@ -21,7 +21,6 @@
       , filename
       ;
     success.socket = true;
-    console.log('starting connection');
     listener = net.createServer(function(listenSocket) { //'connection' listener      
       //When a new socket is opened assign it a uid and map it.
       listenSocket.id = openedConnections;
@@ -30,15 +29,9 @@
       tcpMsg[listenSocket.id] = '';
       openedConnections++;
       browserSocket.emit('connectionChange', openedConnections-closedConnections, false);
-      //Event not quite sure
-      listenSocket.on('end', function() {
-        console.log('server end');
-      });
       //Event when Socket is closed
       listenSocket.on('close', function() {
-        console.log('server close');
         closedConnections++;
-        console.log('destroyed socket '+ listenSocket.id);
         browserSocket.send(tcpMsg[listenSocket.id]);
         browserSocket.emit('connectionChange', openedConnections-closedConnections, true);
         delete socketMap[listenSocket.id];
@@ -47,7 +40,6 @@
       //Event when data is transferred
       listenSocket.on('data', function(data) {
         tcpMsg[listenSocket.id] += (data.toString());
-        console.log('data');
         if(isLoggingTcp){
           tcpBuffer += (data.toString() + '\r\n\r\n');
           browserSocket.emit('seperateFiles', 'tcp');
@@ -56,7 +48,6 @@
     });
     //bind the server to listen to the requested port
     listener.listen(request.params.portNum, function() { //'listening' listener
-      console.log('server bound to '+ request.params.portNum);
       currentTcpPort = request.params.portNum;
       success.listening = true;
       response.json(success);
@@ -96,7 +87,6 @@
   function toggleLog(logpath) {
     if(!isLoggingTcp){
       isLoggingTcp = true;
-      console.log('logging tcp Start');
       file.mkdir('tcp', currentTcpPort, logpath);
     }
     else{
