@@ -1,7 +1,8 @@
 /*jshint strict:true node:true es5:true onevar:true laxcomma:true laxbreak:true*/
 (function () {
   "use strict";
-  var fs = require('fs.extra')
+  var fs = require('fs')
+    , mkdirp = require('mkdirp')
     , path = require('path')
     ;
 
@@ -24,7 +25,7 @@
   
   //Make directory for logger
   function mkdir(protocol, port, logpath) {
-    fs.mkdirp(path.join(logpath, protocol, port));
+    mkdirp(path.join(logpath, protocol, port));
   }
   
   module.exports.mkdir = mkdir;
