@@ -25,20 +25,26 @@
   $('.container').on('.js-all-stream pre', 'click', function(){
     $(this).toggleClass('css-hl-block');
   });
-  $('.container').on('.js-openSocket:not(.inactive)', 'click', function(){
+  $('.container').on('.js-ui-tab-view:not(.css-active) .js-openSocket', 'click', function(){
     makeRequest($(this).attr('data-protocol'));
 	});
+  $('.container').on('.js-ui-tab-view:not(.css-active) .js-portNum', 'keypress', function(e){
+    if(e.keyCode === 13){
+      $('.js-openSocket.js-'+$(this).attr('data-protocol')).trigger('click');
+    }
+  });
   $('.container').on('.js-scroll', 'change', function(){
     scrollLock({protocol: $(this).attr('data-protocol')});
   });
   $('.container').on('.js-clear', 'click', function(){
     $('.js-'+$(this).attr('data-protocol')+'-stream').html('');
   });
-  $('.container').on('.js-log', 'click', function(){
+  $('.container').on('.js-ui-tab-view:not(.css-inactive) .js-log', 'click', function(){
     socket.emit('log' + $(this).attr('data-protocol'));
     $('.js-log.js-' + $(this).attr('data-protocol')).toggleClass('activeLog');
   });
-  $('.container').on('.js-closeSocket:not(.inactive)', 'click', function(){
+  $('.container').on('.js-ui-tab-view:not(.css-inactive) .js-closeSocket', 'click', function(){
+    $('.js-log.activeLog.js-'+$(this).attr('data-protocol')).trigger('click');
     socket.emit('kill' + $(this).attr('data-protocol'));
   });
 
@@ -49,7 +55,7 @@
   
   function makeRequest(protocol) {
     var options = {}
-      , port = $('.js-'+protocol+'-portNum').val()
+      , port = $('.js-portNum.js-'+protocol).val()
       ;
     options.body = '';
     options.protocol = protocol;
@@ -65,7 +71,6 @@
       }
     , success: function (resp) {
         var html, i;
-        console.log('success: ', resp);
         if(!resp.error){
           options.active = true;
           visual.stateChange(options);
@@ -134,6 +139,7 @@
         options.protocol = 'all';
         injectMessage(options);
         options.active = false;
+        $('.js-log.activeLog').trigger('click');
         visual.stateChange(options);
       });
     });
@@ -170,7 +176,6 @@
       ;
     //if xml
     if(options.body.substring(0,3) === '<?x'){
-      console.log('im xml!!!');
       xml_pp = pd.xml(options.body);
       xml = xml_pp.replace(/&/g, '&amp;')
                   .replace(/</g, '&lt;')

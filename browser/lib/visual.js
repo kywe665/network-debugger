@@ -8,23 +8,12 @@
   
   function stateChange(options){
     if(options.protocol === 'all'){
-      stateChange({protocol:'tcp'});
-      stateChange({protocol:'http'});
-      stateChange({protocol:'udp'});
+      $('.js-ui-tab-view.js-all').addClass('css-inactive');
+      $('.js-ui-tab-view.js-all').removeClass('css-active');
     }
     else{
-      if(options.active){
-        $('.js-openSocket.js-'+options.protocol).addClass('inactive');
-        $('.js-closeSocket.js-'+options.protocol).removeClass('inactive');
-        $('.js-'+options.protocol+'-connection-status').removeClass('off');
-        $('.js-'+options.protocol+'-connection-count').html('0');
-      }
-      else{
-        $('.js-openSocket.js-'+options.protocol).removeClass('inactive');
-        $('.js-closeSocket.js-'+options.protocol).addClass('inactive');
-        $('.js-'+options.protocol+'-connection-status').addClass('off');
-        $('.js-'+options.protocol+'-connection-count').html('0');
-      }
+      $('.js-ui-tab-view[data-name="'+options.protocol+'"]').toggleClass('css-active');
+      $('.js-ui-tab-view[data-name="'+options.protocol+'"]').toggleClass('css-inactive');
     }
   }
   

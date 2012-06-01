@@ -17,11 +17,11 @@ html(lang='en')
             li.js-ui-tab.js-udp
               a(href='/udp') UDP
 
-          .js-ui-tab-view.css-ui-tab-view(data-name='tcp')
+          .js-ui-tab-view.css-ui-tab-view.js-all.css-inactive(data-name='tcp')
             p Enter the port to listen on and click 'Listen'
             .css-listen-form
-              input.js-tcp-portNum.css-tcp-portNum(type='text')
-              a.css-button.js-openSocket.js-tcp(data-protocol='tcp') Listen
+              input.js-portNum.js-tcp.css-portNum(type='text')(data-protocol='tcp')
+              a.css-button.css-openSocket.js-openSocket.js-tcp(data-protocol='tcp') Listen
             .css-connection-info
               .css-connection-status.js-tcp-connection-status.off Connection Status
               div Listening to
@@ -34,21 +34,21 @@ html(lang='en')
             .js-tcp-stream.js-all-stream.css-stream
               span.js-allstream-error
             div.css-left.css-bottom
-              a.css-button.js-closeSocket.js-tcp.inactive(data-protocol='tcp') Close Connection
+              a.css-button.css-closeSocket.js-closeSocket.js-tcp(data-protocol='tcp') Close Connection
             div.css-center.css-bottom
               a.css-button.js-clear.js-tcp(data-protocol='tcp') Clear
             div.css-right.css-bottom
               p Lock scroll to bottom
               input.js-scroll.js-tcp(type="checkbox")(checked="true")(data-protocol='tcp')
 
-          .js-ui-tab-view.css-ui-tab-view(data-name='http')
+          .js-ui-tab-view.css-ui-tab-view.js-all.css-inactive(data-name='http')
             p.css-enter-port Enter the port to listen on and click 'Listen'
             .css-log-options
               input.js-include-headers(type="checkbox")(checked="true")
               p Save headers
             .css-listen-form
-              input.js-http-portNum.css-tcp-portNum(type='text')
-              a.css-button.js-openSocket.js-http(data-protocol='http') Listen
+              input.js-portNum.js-http.css-portNum(type='text')(data-protocol='http')
+              a.css-button.css-openSocket.js-openSocket.js-http(data-protocol='http') Listen
             .css-connection-info
               .css-connection-status.js-http-connection-status.off Connection Status
             .css-top.right
@@ -58,18 +58,18 @@ html(lang='en')
             .js-http-stream.js-all-stream.css-stream
               span.js-allstream-error
             div.css-left.css-bottom
-              a.css-button.js-closeSocket.js-http.inactive(data-protocol='http') Close Connection
+              a.css-button.css-closeSocket.js-closeSocket.js-http(data-protocol='http') Close Connection
             div.css-center.css-bottom
               a.css-button.js-clear.js-http(data-protocol='http') Clear
             div.css-right.css-bottom
               p Lock scroll to bottom
               input.js-scroll.js-http(type="checkbox")(checked="true")(data-protocol='http')
 
-          .js-ui-tab-view.css-ui-tab-view(data-name='udp')
+          .js-ui-tab-view.css-ui-tab-view.js-all.css-inactive(data-name='udp')
             p Enter the port to listen on and click 'Listen'
             .css-listen-form
-              input.js-udp-portNum.css-tcp-portNum(type='text')
-              a.css-button.js-openSocket.js-udp(data-protocol='udp') Listen
+              input.js-portNum.js-udp.css-portNum(type='text')(data-protocol='udp')
+              a.css-button.css-openSocket.js-openSocket.js-udp(data-protocol='udp') Listen
             .css-connection-info
               .css-connection-status.js-udp-connection-status.off Connection Status
             .css-top.right
@@ -79,7 +79,7 @@ html(lang='en')
             .js-udp-stream.js-all-stream.css-stream
               span.js-allstream-error
             div.css-left.css-bottom
-              a.css-button.js-closeSocket.js-udp.inactive(data-protocol='udp') Close Connection
+              a.css-button.css-closeSocket.js-closeSocket.js-udp(data-protocol='udp') Close Connection
             div.css-center.css-bottom
               a.css-button.js-clear.js-udp(data-protocol='udp') Clear
             div.css-right.css-bottom
