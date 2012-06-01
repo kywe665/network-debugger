@@ -38,6 +38,8 @@
 
   connect.router = require('connect_router');
 
+  io.set('log level', 1);
+
   function create (logpath) {
     //function when a GET request is sent to /listenUDP
     function listenUdp(request, response) {
@@ -240,8 +242,7 @@
         ;
       if(buffer.indexOf("kml") != -1){
         ext = '.kml';
-      }      
-
+      }
       filename = date.getHours()+'-'+date.getMinutes()+'-'+date.getSeconds()+'_'+(date.getMonth()+1)+'-'+date.getDate()+'-'+date.getFullYear();
       fs.writeFile(path.join(logpath, protocol, port, filename+ext), buffer
       , function (err) {
