@@ -4,7 +4,7 @@
   "use strict";
 
   var port = process.argv[2] || 0
-    , create = require('../server')
+    , create = require('../server').create
     , path = require('path')
     , app
     ;
