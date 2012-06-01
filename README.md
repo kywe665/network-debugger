@@ -17,3 +17,5 @@ ex:
     netbug-server 1234 log-files
 
 ####Now open your browser to http://localhost:1234
+
+If you choose to log files they will be saved in the directory that you specified.
