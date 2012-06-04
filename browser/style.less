@@ -30,30 +30,35 @@ body{
     margin-left: 0px;
   }
 }
-.container {
-	.centered;
-	.rounded-bottom(10px);
-	background-color: #3D3F37;
-	min-height: 380px;
-	padding: 20px;
-}
 .header{
-	.centered;
-	.rounded-top(15px);
-	background-color: @darkBackground;
-	height: 50px;
+  background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#4c4c4c),
+   color-stop(0%,#4f4f4f), color-stop(20%,#3a3a3a), color-stop(50%,#2c2c2c), 
+   color-stop(52%,#1d1d1d), color-stop(100%,#262626), color-stop(100%,#2d2d2d), 
+   color-stop(100%,#1d1d1d));
+  border-radius: 10px;
+  height: 27px;
+  padding: 6px 15px;
+  box-shadow: inset 0px 0px 1px 1px #111;
+  margin-bottom: 26px;
+  margin-top: 10px;
+  .css-title{
+    float: left;
+    color: @strongYellow;
+    text-shadow: 0px 1px 0px #444, -1px -1px 0px #111;
+    font-size: 24px;
+  }
+  img{
+    float: left;
+    margin: 0px 20px 0px 15px;
+    width: 105px;
+  }
+  .css-logo{
+    position: relative;
+    top: -14px;
+    left: -10px;
+  }
 }
-.header h1{
-	color: @strongYellow;
-	line-height:54px;
-	text-shadow: 2px 2px 2px #000000;
-  font-size: 25px;
-}
-.header img{
-	float: left;
-	margin: 0px 20px 0px 15px;
-  width: 95px;
-}
+
 .css-tab-menu{
   -webkit-margin-before: 0;
 	li{
@@ -164,7 +169,7 @@ body{
 .css-stream{
   background-color: #222;
   color: #CCC;
-  width: 854px;
+  width: 884px;
 	height: 340px;
 	padding: 10px;
   clear: left;
@@ -233,14 +238,16 @@ body{
 }
 .css-bottom{
   float: left;
-  width:293px;
+  width:173px;
   p{
     float: left;
     position: relative;
-    left: 130px;
   }
   input{
     float: right;
+  }
+  &.css-right{
+    float:right;
   }
 }
 .css-top{
@@ -259,29 +266,11 @@ body{
 }
 
 .new{
-  .header{
-    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#4c4c4c),
-     color-stop(0%,#4f4f4f), color-stop(20%,#3a3a3a), color-stop(50%,#2c2c2c), 
-     color-stop(52%,#1d1d1d), color-stop(100%,#262626), color-stop(100%,#2d2d2d), 
-     color-stop(100%,#1d1d1d));
-    border-radius: 10px;
-    height: 47px;
-    box-shadow: inset 0px 0px 1px 1px #111;
-    h1{
-      text-shadow: 0px 1px 0px #444, -1px -1px 0px #111;
-      font-size: 24px;
-      line-height: 44px;
-    }
-  }
-  .container{
-    position: relative;
-    top: 30px;
-  }
   .css-tab-menu{
     float: left;
     position: relative;
-    left: 626px;
-    top: -59px;
+    left: 268px;
+    top: -5px;
     box-shadow: -1px 0px 6px 0px #111;
     li{
       float: left;
@@ -303,16 +292,64 @@ body{
         border-radius: 0px 10px 10px 0px;
       }
       a{
-        padding: 13px 38px;
+        padding: 9px 38px;
         display: block;
-        text-shadow: 0px 1px 0px #444, -1px -1px 0px #111;
+        text-shadow: 0px 1px 0px #444, 0px -1px 0px #111;
         color: white;
       }
-      &:hover{
+      &:hover:not(.selected){
         background: -webkit-linear-gradient(top, #1d1d1d 0%,#2d2d2d 0%,#262626 0%,#2c2c2c 52%,#3a3a3a 82%,#3f3f3f 100%,#4c4c4c 100%);
       }
     }
   }
+  .css-ui-tab-view{
+    background: rgba(72, 73, 65, 0.8);
+    border: 6px solid #222;
+    border-radius: 15px;
+    position: relative;
+    top: -18px;
+    p{
+      color: #ccc;
+    }
+    .css-stream{
+      background: rgba(139, 144, 127, 0.6);
+    }
+    .css-connection-status{
+      box-shadow: inset 0px 0px 10px 4px #3D3F37;
+    }
+    .css-top.right{
+      width: 320px;
+    }
+    &.css-inactive{
+      .css-connection-status{
+        background: -webkit-radial-gradient(center, ellipse cover, #AA3636 23%, #931D1D 100%);
+      }
+    }
+    &.css-active{
+      .css-connection-status{
+        background: -webkit-radial-gradient(center, ellipse cover, green 23%, #3D3F37 100%);
+      }
+    }
+  }
+}
+
+@font-face {
+  font-family: 'Play';
+  font-style: normal;
+  font-weight: normal;
+  /*
+  src: local('Play'), url('http://themes.googleusercontent.com/static/fonts/play/v2/PeTTkHQKj5rUPVxkIGAoaw.ttf') format('truetype');
+  */
+  src: local('Play'), url('fonts/play.ttf') format('truetype');
+}
+@font-face {
+  font-family: 'Play';
+  font-style: normal;
+  font-weight: bold;
+  /*
+  src: local('Play-Bold'), url('http://themes.googleusercontent.com/static/fonts/play/v2/j7wx-rRiDuE-JcaZ1ilpKg.ttf') format('truetype');
+  */
+  src: local('Play-Bold'), url('fonts/play-bold.ttf') format('truetype');
 }
 
 pre code {
