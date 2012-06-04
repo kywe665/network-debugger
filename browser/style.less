@@ -258,6 +258,63 @@ body{
   }
 }
 
+.new{
+  .header{
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#4c4c4c),
+     color-stop(0%,#4f4f4f), color-stop(20%,#3a3a3a), color-stop(50%,#2c2c2c), 
+     color-stop(52%,#1d1d1d), color-stop(100%,#262626), color-stop(100%,#2d2d2d), 
+     color-stop(100%,#1d1d1d));
+    border-radius: 10px;
+    height: 47px;
+    box-shadow: inset 0px 0px 1px 1px #111;
+    h1{
+      text-shadow: 0px 1px 0px #444, -1px -1px 0px #111;
+      font-size: 24px;
+      line-height: 44px;
+    }
+  }
+  .container{
+    position: relative;
+    top: 30px;
+  }
+  .css-tab-menu{
+    float: left;
+    position: relative;
+    left: 626px;
+    top: -59px;
+    box-shadow: -1px 0px 6px 0px #111;
+    li{
+      float: left;
+      list-style-type: none;
+      position: relative;
+      left: -40px;
+      box-shadow: inset -6px 0px 6px -5px #111, inset 6px 3px 2px -5px #555;
+      background-color:transparent;
+      border-radius: 0px;
+      padding: 0px;
+      margin-left: 0px;
+      &.selected{
+        background: -webkit-radial-gradient(center, ellipse cover, #4c4c4c 0%,#262626 0%,#141414 100%,#2d2d2d 100%,#1d1d1d 100%);
+        a{
+          color: #FFC925;
+        }
+      }
+      &:last-child{
+        border-radius: 0px 10px 10px 0px;
+      }
+      a{
+        padding: 13px 38px;
+        display: block;
+        text-shadow: 0px 1px 0px #444, -1px -1px 0px #111;
+        color: white;
+      }
+      &:hover{
+        background: -webkit-linear-gradient(top, #1d1d1d 0%,#2d2d2d 0%,#262626 0%,#2c2c2c 52%,#3a3a3a 82%,#3f3f3f 100%,#4c4c4c 100%);
+      }
+    }
+  }
+}
+
 pre code {
   display: block; padding: 0.5em;
   color: #DCDCDC;
