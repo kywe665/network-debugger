@@ -22,35 +22,43 @@
   io.set('log level', 1);
 
   function create (logpath) {
+    openSockets();
     //function when a GET request is sent to /listenUDP
     function listenUdp(request, response) {
-      openSockets();
       udpServer.startListening(request, response);
     }
 
     //function when a GET request is sent to /listenHTTP
     function listenHttp(request, response) {
-      openSockets();
       httpServer.startListening(request, response);
     }
 
     //function when a GET request is sent to /listenTCP
     function listenTcp(request, response) {
-      openSockets();
       tcpServer.startListening(request, response);
+    }
+
+    function onPageLoad(request, response){
+      response.json({
+        "http": httpServer.currentStatus()
+      , "tcp": tcpServer.currentStatus()
+      , "udp": udpServer.currentStatus()
+      });
+      response.end();
     }
     
     //Browser Comm Sockets
     function openSockets() {
       io.sockets.on('connection', function (socket) {
         browserSocket = socket;
+        console.log('Connected to browser');
         udpServer.assignSocket(socket);
         tcpServer.assignSocket(socket);
         httpServer.assignSocket(socket);
         socket.on('message', function (data) {
         });
         socket.on('disconnect', function () { 
-          console.log('DiScOnNected socket');
+          console.log('Browser disconnected');
         });
         socket.on('killtcp', function () {
           tcpServer.closeAllSockets();
@@ -94,6 +102,7 @@
       rest.get('/listentcp/:portNum', listenTcp);
       rest.get('/listenhttp/:portNum', listenHttp);
       rest.get('/listenudp/:portNum', listenUdp);
+      rest.get('/onPageLoad', onPageLoad);
     }
 
     app.use(connect.favicon());

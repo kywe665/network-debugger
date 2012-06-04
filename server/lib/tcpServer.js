@@ -12,6 +12,7 @@
     , isLoggingTcp = false
     , tcpBuffer = ''
     , currentTcpPort
+    , socketOpen = false
     ;
 
   //Open Sockets to listen on network TCP
@@ -50,6 +51,7 @@
     listener.listen(request.params.portNum, function() { //'listening' listener
       currentTcpPort = request.params.portNum;
       success.listening = true;
+      socketOpen = true;
       response.json(success);
       response.end();
     });
@@ -73,11 +75,14 @@
 
   //When user requests to close the connection
   function closeAllSockets() {
-    Object.keys(socketMap).forEach(function(socket){
-      socketMap[socket].destroy();
-    });
-    listener.close();
-    browserSocket.emit('closedConnection', currentTcpPort, 'tcp');
+    if(socketOpen){
+      Object.keys(socketMap).forEach(function(socket){
+        socketMap[socket].destroy();
+      });
+      listener.close();
+      browserSocket.emit('closedConnection', currentTcpPort, 'tcp');
+      socketOpen = false;
+    }
   }
 
   function writeFile(logpath){
@@ -102,6 +107,14 @@
     browserSocket = socket;
   }
   
+  function currentStatus() {
+    return {
+      "open": socketOpen,
+      "port": currentTcpPort
+    };
+  }
+
+  module.exports.currentStatus = currentStatus;
   module.exports.assignSocket = assignSocket;
   module.exports.toggleLog = toggleLog;
   module.exports.writeFile = writeFile;

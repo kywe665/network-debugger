@@ -18,8 +18,38 @@
     , pure = require('./pure-inject')
     , visual = require('./visual')
     ;
-
-  uiTabs.create('body', '.js-ui-tab a', '.js-ui-tab', '.js-ui-tab-view', 'http');
+  
+  $(document).ready(function() {
+    var options = {};
+    options.body = '';
+    openSocket(options);
+    uiTabs.create('body', '.js-ui-tab a', '.js-ui-tab', '.js-ui-tab-view', 'http');
+    reqwest({
+      url: 'http://'+window.location.host+'/onPageLoad'
+    , type: 'json'
+    , method: 'get'
+    , error: function (err) { 
+        console.log('Server Error: ', err);
+        options.body = 'Cannot communicate with netbug server';
+        options.cssClass = 'css-streamError';
+        injectMessage(options);
+      }
+    , success: function (resp) {
+        var html, i;
+        if(!resp.error){
+          initBuild(resp);
+        }
+        else{
+          options.cssClass = 'css-streamError';
+          for(i=0; i < resp.errors.length; i=i+1){
+						options.body += resp.errors[i].message;
+					}
+        }
+        injectMessage(options);
+      }
+    });
+  });
+  
   
   //EVENT LISTENERS ALL
   $('.container').on('.js-all-stream pre', 'click', function(){
@@ -147,10 +177,24 @@
       });
     });
   }
+  
+  function initBuild(resp){
+    var options = {};
+    options.body = '';
+    Object.keys(resp.result).forEach(function(protocol){
+      if(resp.result[protocol].open){
+        options.protocol = protocol;
+        visual.stateChange(options);
+        options.body = 'Socket open. Listening on port: '+ resp.result[protocol].port;
+        options.cssClass = 'css-streamNewConnection';
+        injectMessage(options);
+        $('.js-portNum.js-'+protocol).val(resp.result[protocol].port);
+      }
+    });
+  }  
 
   function scrollLock(options) {
     if($('.js-scroll.js-'+options.protocol).attr('checked')){
-      console.log('lock');
       $('.js-'+options.protocol+'-stream')[0].scrollTop = $('.js-'+options.protocol+'-stream')[0].scrollHeight;
     }
   }

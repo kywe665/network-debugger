@@ -9,6 +9,7 @@
     , currentUdpPort
     , browserSocket
     , file = require('./file')
+    , socketOpen = false
     ;
 
   function startListening (request, response) {
@@ -23,9 +24,11 @@
     });
     serverUdp.on("listening", function () {
       var address = serverUdp.address();
+      socketOpen = true;
     });
     serverUdp.on("close", function () {
       browserSocket.emit('closedConnection', request.params.portNum, 'udp');
+      socketOpen = false;
     });
     serverUdp.on("error", function (e) {
       console.log("UDP error: " + e);
@@ -54,13 +57,23 @@
   }
 
   function close(){
-    serverUdp.close();
+    if(socketOpen){
+      serverUdp.close();
+    }
   }
 
   function assignSocket (socket) {
     browserSocket = socket;
   }
 
+  function currentStatus() {
+    return {
+      "open": socketOpen,
+      "port": currentUdpPort
+    };
+  }
+
+  module.exports.currentStatus = currentStatus;
   module.exports.assignSocket = assignSocket;
   module.exports.close = close;
   module.exports.toggleLog = toggleLog;

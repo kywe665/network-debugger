@@ -10,6 +10,7 @@
     , httpBuffer = ''
     , includeHeaders = false
     , file = require('./file')
+    , socketOpen = false
     ;
   
   function startListening(request, response){
@@ -17,9 +18,11 @@
       .use(getBody)
       .use(readHttp);
     serverHttp = connectObj.listen(request.params.portNum);
+    socketOpen = true;
     currentHttpPort = request.params.portNum;
     serverHttp.on('close', function() {
       browserSocket.emit('closedConnection', request.params.portNum, 'http');
+      socketOpen = false;
     });
     response.end();
   }
@@ -44,7 +47,6 @@
       data += key + ': ' + req.headers[key] + '\r\n';
     });
     data += '\r\n';
-
     browserSocket.emit('httpData', {
         "headers": data
       , "body": req.rawBody
@@ -81,7 +83,9 @@
   }
 
   function close(){
-    serverHttp.close();
+    if(socketOpen){
+      serverHttp.close();
+    }
   }
     
   function headers(bool){
@@ -91,7 +95,14 @@
   function assignSocket (socket) {
     browserSocket = socket;
   }
+  function currentStatus() {
+    return {
+      "open": socketOpen,
+      "port": currentHttpPort
+    };
+  }
 
+  module.exports.currentStatus = currentStatus;
   module.exports.toggleLog = toggleLog;
   module.exports.writeFile = writeFile;
   module.exports.close = close;
