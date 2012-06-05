@@ -61,37 +61,55 @@ body{
 
 .css-tab-menu{
   -webkit-margin-before: 0;
+  -webkit-margin-after: 0px;
+  -webkit-padding-start: 0px;
+  position: relative;
+  float: right;
+  left: 15px;
+  top: -5px;
+  box-shadow: -1px 0px 6px 0px #111;
 	li{
-		.rounded-top(8px);
 		float: left;
-		list-style-type: none;
-		margin-left: 5px;
-		background-color: @darkBackground;
-		padding: 4px 8px;
-		position:relative;
-		left:-45px;
+    list-style-type: none;
+    position: relative;
+    box-shadow: inset -6px 0px 6px -5px #111, inset 6px 3px 2px -5px #555;
+    background-color:transparent;
+    border-radius: 0px;
+    padding: 0px;
+    margin-left: 0px;
 		a{
-			color: @strongYellow;
+      padding: 9px 38px;
+      display: block;
+      text-shadow: 0px 1px 0px #444, 0px -1px 0px #111;
+      color: white;
 			text-decoration: none;
-			font-weight: bold;
 		}
+    &.selected{
+      background: -webkit-radial-gradient(center, ellipse cover, #4c4c4c 0%,#262626 0%,#141414 100%,#2d2d2d 100%,#1d1d1d 100%);
+      a{
+        color: #FFC925;
+      }
+    }
+    &:last-child{
+      border-radius: 0px 10px 10px 0px;
+    }
+    &:hover:not(.selected){
+      cursor: pointer;
+      background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#4c4c4c), color-stop(0%,#424242), color-stop(20%,#2d2d2d), color-stop(50%,#2b2b2b), color-stop(51%,#191919), color-stop(82%,#1e1e1e), color-stop(100%,#333333), color-stop(100%,#262626), color-stop(100%,#2d2d2d), color-stop(100%,#191919));
+    }
 	}
-  li.selected{
-    background-color: @lightBackground;
-		a{
-			color:#2E2E2A;
-		}
-  }
 }
 .css-ui-tab-view{
-	clear: both;
-	background-color: @lightBackground;
+	background: rgba(72, 73, 65, 0.8);
+  border: 6px solid #222;
+  border-radius: 15px;
+  position: relative;
+  top: -18px;
 	min-height: 480px;
 	padding: 20px;
-	border-radius: 0px 6px 6px 6px;
 	overflow: hidden;
   p{
-    color: #222;
+    color: #ccc;
     -webkit-margin-before: 0px;
     font-size: 15px;
     -webkit-margin-after: 4px;
@@ -130,7 +148,7 @@ body{
       .disabled
     }
     .css-connection-status{
-      background: -webkit-radial-gradient(center, ellipse cover, green 23%,#8B907F 100%);
+      background: -webkit-radial-gradient(center, ellipse cover, green 23%, #3D3F37 100%);
     }
   }
   &.css-inactive{
@@ -141,7 +159,7 @@ body{
       .disabled
     }
     .css-connection-status{
-      background: -webkit-radial-gradient(center, ellipse cover, #A52121 23%,#8B907F 100%);
+      background: -webkit-radial-gradient(center, ellipse cover, #AA3636 23%, #931D1D 100%);
     }
   }
 }
@@ -167,7 +185,7 @@ body{
   }
 }
 .css-stream{
-  background-color: #222;
+  background: rgba(32, 32, 32, 0.6);
   color: #CCC;
   width: 884px;
 	height: 340px;
@@ -229,7 +247,7 @@ body{
     margin-right: 50px;
     border-radius: 120px;
     padding: 1px 10px;
-    box-shadow: inset 0px 0px 11px 2px #8B907F;
+    box-shadow: inset 0px 0px 10px 4px #3D3F37;
     -webkit-transition: background .3s linear;
   }
   .css-connection-count{
@@ -253,7 +271,7 @@ body{
 .css-top{
   &.right{
     float:right;
-    width: 305px;
+    width: 320px;
     margin-top: 4px;
     p{
       float: left;
@@ -261,87 +279,6 @@ body{
     }
     input{
       margin: 2px 15px 0px 10px;
-    }
-  }
-}
-
-.new{
-  .css-tab-menu{
-    float: left;
-    position: relative;
-    left: 268px;
-    top: -5px;
-    box-shadow: -1px 0px 6px 0px #111;
-    li{
-      float: left;
-      list-style-type: none;
-      position: relative;
-      left: -40px;
-      box-shadow: inset -6px 0px 6px -5px #111, inset 6px 3px 2px -5px #555;
-      background-color:transparent;
-      border-radius: 0px;
-      padding: 0px;
-      margin-left: 0px;
-      &.selected{
-        background: -webkit-radial-gradient(center, ellipse cover, #4c4c4c 0%,#262626 0%,#141414 100%,#2d2d2d 100%,#1d1d1d 100%);
-        a{
-          color: #FFC925;
-        }
-      }
-      &:last-child{
-        border-radius: 0px 10px 10px 0px;
-      }
-      a{
-        padding: 9px 38px;
-        display: block;
-        text-shadow: 0px 1px 0px #444, 0px -1px 0px #111;
-        color: white;
-      }
-      &:hover:not(.selected){
-        cursor: pointer;
-        background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#4c4c4c), color-stop(0%,#424242), color-stop(20%,#2d2d2d), color-stop(50%,#2b2b2b), color-stop(51%,#191919), color-stop(82%,#1e1e1e), color-stop(100%,#333333), color-stop(100%,#262626), color-stop(100%,#2d2d2d), color-stop(100%,#191919));
-      }
-      &:hover:after{
-        //background: -webkit-linear-gradient(top, #1d1d1d 0%,#2d2d2d 0%,#262626 0%,#2c2c2c 52%,#3a3a3a 82%,#3f3f3f 100%,#4c4c4c 100%);
-        //background-image: rgba(152, 152, 152, .6);
-        /*content: '';
-        display: block;
-        background: red;
-        position: absolute;
-        top: 0px;
-        width: 100%;
-        height: 100%;
-        opacity: .5;*/
-      }
-    }
-  }
-  .css-ui-tab-view{
-    background: rgba(72, 73, 65, 0.8);
-    border: 6px solid #222;
-    border-radius: 15px;
-    position: relative;
-    top: -18px;
-    p{
-      color: #ccc;
-    }
-    .css-stream{
-      background: rgba(139, 144, 127, 0.6);
-    }
-    .css-connection-status{
-      box-shadow: inset 0px 0px 10px 4px #3D3F37;
-    }
-    .css-top.right{
-      width: 320px;
-    }
-    &.css-inactive{
-      .css-connection-status{
-        background: -webkit-radial-gradient(center, ellipse cover, #AA3636 23%, #931D1D 100%);
-      }
-    }
-    &.css-active{
-      .css-connection-status{
-        background: -webkit-radial-gradient(center, ellipse cover, green 23%, #3D3F37 100%);
-      }
     }
   }
 }
