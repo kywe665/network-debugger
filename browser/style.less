@@ -22,7 +22,7 @@ body{
 	border-radius: @radius @radius 0px 0px;
 }
 .disabled{
-  background-color: #777;
+  background-color: #555;
   box-shadow: inset 0 30px 35px -18px #222;
   &:hover{
     cursor: default;
@@ -40,7 +40,7 @@ body{
   padding: 6px 15px;
   box-shadow: inset 0px 0px 1px 1px #111;
   margin-bottom: 26px;
-  margin-top: 10px;
+  margin-top: 12px;
   .css-title{
     float: left;
     color: @strongYellow;
@@ -298,7 +298,20 @@ body{
         color: white;
       }
       &:hover:not(.selected){
-        background: -webkit-linear-gradient(top, #1d1d1d 0%,#2d2d2d 0%,#262626 0%,#2c2c2c 52%,#3a3a3a 82%,#3f3f3f 100%,#4c4c4c 100%);
+        cursor: pointer;
+        background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#4c4c4c), color-stop(0%,#424242), color-stop(20%,#2d2d2d), color-stop(50%,#2b2b2b), color-stop(51%,#191919), color-stop(82%,#1e1e1e), color-stop(100%,#333333), color-stop(100%,#262626), color-stop(100%,#2d2d2d), color-stop(100%,#191919));
+      }
+      &:hover:after{
+        //background: -webkit-linear-gradient(top, #1d1d1d 0%,#2d2d2d 0%,#262626 0%,#2c2c2c 52%,#3a3a3a 82%,#3f3f3f 100%,#4c4c4c 100%);
+        //background-image: rgba(152, 152, 152, .6);
+        /*content: '';
+        display: block;
+        background: red;
+        position: absolute;
+        top: 0px;
+        width: 100%;
+        height: 100%;
+        opacity: .5;*/
       }
     }
   }
