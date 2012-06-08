@@ -4,17 +4,19 @@ Network Debugging tool. Monitor Http, Tcp, and Udp traffic on your network. Save
 
 ## Install
 
-Install with [npm](http://github.com/isaacs/npm):
+1. Install [Nodejs](http://nodejs.org)
+
+2. Install netbug with [npm](http://github.com/isaacs/npm):
 
     sudo npm install -g netbug
 
 ## Run
 
-    netbug-server (port #) [directory to save logs]
+    netbug-server <port> <log-directory>
     
 ex:
 
-    netbug-server 1234 log-files
+    netbug-server 1234 ./logs
 
 ####Now open your browser to http://localhost:1234
 
