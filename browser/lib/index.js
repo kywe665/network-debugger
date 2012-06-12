@@ -1,4 +1,4 @@
-/*jshint strict:true node:true es5:true onevar:true laxcomma:true laxbreak:true*/
+/*jshint strict:true node:true es5:true onevar:true laxcomma:true laxbreak:true devel:true*/
 /*
  * BROWSER
  */
@@ -196,6 +196,10 @@
   function scrollLock(options) {
     if($('.js-scroll.js-'+options.protocol).attr('checked')){
       $('.js-'+options.protocol+'-stream')[0].scrollTop = $('.js-'+options.protocol+'-stream')[0].scrollHeight;
+    }
+    if($('.js-'+options.protocol+'-stream')[0].scrollHeight > 12000){
+      $('.js-'+options.protocol+'-stream span').first().remove();
+      $('.js-'+options.protocol+'-stream span').first().remove();
     }
   }
 
