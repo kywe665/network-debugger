@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "steve": "0.5.x",
+    "connect": "2.3.6",
     "connect_router": "1.x",
     "socket.io": "*",
     "mkdirp": "*"
