@@ -10,11 +10,17 @@
     var date = new Date()
       , filename
       , ext = '.txt'
+      , hours = ('0'+date.getHours()).slice(-2)
+      , minutes = ('0'+date.getMinutes()).slice(-2)
+      , seconds = ('0'+date.getSeconds()).slice(-2)
+      , month = ('0'+(date.getMonth()+1)).slice(-2)
+      , day = ('0'+date.getDate()).slice(-2)
+      , year = date.getFullYear()
       ;
     if(buffer.indexOf("<kml") != -1){
       ext = '.kml';
     }
-    filename = date.getHours()+'-'+date.getMinutes()+'-'+date.getSeconds()+'_'+(date.getMonth()+1)+'-'+date.getDate()+'-'+date.getFullYear();
+    filename = hours+'-'+minutes+'-'+seconds+'_'+month+'-'+day+'-'+year;
     fs.writeFile(path.join(logpath, protocol, port, filename+ext), buffer
     , function (err) {
         if (err) throw err;
