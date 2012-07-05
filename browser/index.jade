@@ -11,13 +11,14 @@ html(lang='en')
         .css-title Network Debugger
         ul.css-tab-menu
           li.js-ui-tab.js-http(data-protocol='http')
-            a(href='/http') HTTP
+            a(href='/http/default') HTTP
           li.js-ui-tab.js-tcp(data-protocol='tcp')
             a(href='/tcp') TCP
           li.js-ui-tab.js-udp(data-protocol='udp')
             a(href='/udp') UDP
-      .container
+      .css-container.container
         .js-ui-tab-view.css-ui-tab-view.js-all.css-inactive(data-name='tcp')
+          .css-tab-bar.js-tab-bar
           p Enter the port to listen on and click 'Listen'
           .css-listen-form
             input.js-portNum.js-tcp.css-portNum(type='text')(data-protocol='tcp')
@@ -41,31 +42,23 @@ html(lang='en')
             p Lock scroll to bottom
             input.js-scroll.js-tcp(type="checkbox")(checked="true")(data-protocol='tcp')
 
-        .js-ui-tab-view.css-ui-tab-view.js-all.css-inactive(data-name='http')
-          p.css-enter-port Enter the port to listen on and click 'Listen'
-          .css-log-options
-            input.js-include-headers(type="checkbox")
-            p Save headers
-          .css-listen-form
-            input.js-portNum.js-http.css-portNum(type='text')(data-protocol='http')
-            a.css-button.css-openSocket.js-openSocket.js-http(data-protocol='http') Listen
-          .css-connection-info
-            .css-connection-status.js-http-connection-status.off Connection Status
-          .css-top.right
-            p Save each packet seperately
-            input.js-http-multifile(type="checkbox")(checked="true")
-            a.css-button.js-log.js-http.css-log(data-protocol='http')
-          .js-http-stream.js-all-stream.css-stream
-            span.js-allstream-error
-          div.css-left.css-bottom
-            a.css-button.css-closeSocket.js-closeSocket.js-http(data-protocol='http') Close Connection
-          div.css-center.css-bottom
+        .js-ui-tab-view.js-all.css-inactive(data-name='http')
+          .css-tab-bar.js-tab-bar
+            li.js-ui-tab.js-default.css-default.css-hidden(data-protocol="http")
+              a(href='/http/default')  + 
+          .js-ui-tab-view.css-ui-tab-view(data-name='default')
+            p.css-enter-port Enter the port to listen on and click 'Listen'
+            .css-listen-form
+              input.js-portNum.js-http.css-portNum(type='text')(data-protocol='http')
+              a.css-button.css-openSocket.js-openSocket.js-http(data-protocol='http') Listen
+            .js-http-stream.js-all-stream.css-stream
+              span.js-allstream-error
             a.css-button.js-clear.js-http(data-protocol='http') Clear
-          div.css-right.css-bottom
-            p Lock scroll to bottom
-            input.js-scroll.js-http(type="checkbox")(checked="true")(data-protocol='http')
+          .css-tab-container.js-tab-container
+            
 
         .js-ui-tab-view.css-ui-tab-view.js-all.css-inactive(data-name='udp')
+          .css-tab-bar.js-tab-bar
           p Enter the port to listen on and click 'Listen'
           .css-listen-form
             input.js-portNum.js-udp.css-portNum(type='text')(data-protocol='udp')
@@ -86,15 +79,47 @@ html(lang='en')
             p Lock scroll to bottom
             input.js-scroll.js-udp(type="checkbox")(checked="true")(data-protocol='udp')
 
-      span.js-message-template
-        span
-        br
-      span.js-timestamp-template
-        .css-streamTime
-      span.js-code-template
-        pre
+      span.js-all-templates.css-hidden
+        span.js-message-template
           span
-          code.highlight-me
+          br
+        span.js-timestamp-template
+          .css-streamTime
+        span.js-code-template
+          pre
+            span
+            code.highlight-me
+        span.js-tab-template
+          li.js-ui-tab(data-protocol='')
+            a(href='')
+            span.js-close-tab.css-close-tab x
+        div
 
 script(src='./vendor/highlight.pack.js', type='text/javascript')
 script(src='pakmanaged.js', type='text/javascript')
+
+//
+  span.js-tab-container-template
+        .js-ui-tab-view.css-ui-tab-view.js-all.css-inactive(data-name='')
+          span.js-top-template
+            .css-log-options
+              input.js-include-headers(type="checkbox")
+              p Save headers
+            .css-listen-form
+              span.js-port-num.css-port-num(data-protocol='')(type='text')
+            .css-connection-info
+              .css-connection-status.js-http-connection-status.off Connection Status
+            .css-top.right
+              p Save each packet seperately
+              input.js-http-multifile(type="checkbox")(checked="true")
+              a.css-button.js-log.css-log(data-protocol='')
+            .js-http-stream.js-all-stream.css-stream
+              span.js-allstream-error
+          span.js-bottom-template
+            .css-left.css-bottom
+              a.css-button.css-closeSocket.js-closeSocket(data-protocol='') Close Connection
+            .css-center.css-bottom
+              a.css-button.js-clear(data-protocol='') Clear
+            .css-right.css-bottom
+              p Lock scroll to bottom
+              input.js-scroll(type="checkbox")(checked="true")(data-protocol='')

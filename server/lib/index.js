@@ -60,21 +60,21 @@
         socket.on('disconnect', function () { 
           console.log('Browser disconnected');
         });
-        socket.on('killtcp', function () {
+        socket.on('killtcp', function (port) {
           tcpServer.closeAllSockets();
         });
-        socket.on('killhttp', function () {
-          httpServer.close();
+        socket.on('killhttp', function (port) {
+          httpServer.close(port);
         });
-        socket.on('killudp', function () {
+        socket.on('killudp', function (port) {
           udpServer.close();
         });
-        socket.on('writeFile', function (protocol) { 
+        socket.on('writeFile', function (protocol, port) { 
           if (protocol === 'tcp'){
             tcpServer.writeFile(logpath);
           }
           else if (protocol === 'http'){
-            httpServer.writeFile(logpath);
+            httpServer.writeFile(logpath, port);
           }
           else if (protocol === 'udp'){
             udpServer.writeFile(logpath);
@@ -86,13 +86,13 @@
         socket.on('includeHeaders', function (bool) { 
           httpServer.headers(bool);
         });
-        socket.on('logtcp', function() {
+        socket.on('logtcp', function(port) {
           tcpServer.toggleLog(logpath);
         });
-        socket.on('loghttp', function() {
-          httpServer.toggleLog(logpath);
+        socket.on('loghttp', function(port) {
+          httpServer.toggleLog(logpath, port);
         });
-        socket.on('logudp', function() {
+        socket.on('logudp', function(port) {
           udpServer.toggleLog(logpath);
         });
       });

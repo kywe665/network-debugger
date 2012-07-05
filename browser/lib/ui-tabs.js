@@ -28,12 +28,17 @@
       pathname = urlObj.pathname.substr(1).replace('/', '_');
       $(uiView).hide();
       $(uiTab).removeClass('selected');
-      if (0 === $(uiView + '[data-name=' + pathname + ']').length) {
-        location.hash = '#/' + defaultView;
-        return;
-      }
-      $(uiView + '[data-name=' + pathname + ']').show();
-      $(uiTab + '.js-' + pathname).addClass('selected');
+      urlObj.pathname.split('/').forEach(function(view){
+        if(!view){
+          return;
+        }
+        if (0 === $(uiView + '[data-name=' + view + ']').length) {
+          location.hash = '#/' + defaultView;
+          return;
+        }
+        $(uiView + '[data-name=' + view + ']').show();
+        $(uiTab + '.js-' + view).addClass('selected');
+      });
     }
 
     global.window.addEventListener('hashchange', displayTab);
@@ -73,4 +78,6 @@
   
   module.exports.create = create;
 }());
+
+
 

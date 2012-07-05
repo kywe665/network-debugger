@@ -1,28 +1,29 @@
 /*jshint strict:true node:true es5:true onevar:true laxcomma:true laxbreak:true*/
 (function () {
   "use strict";
-  var connect = require('steve')
+  var connect = require('connect')
     , app = connect.createServer()
-    , serverHttp
+    , serverHttp = {}
     , currentHttpPort
     , browserSocket
-    , isLoggingHttp = false
+    , isLoggingHttp = {}
     , httpBuffer = ''
     , includeHeaders = false
     , file = require('./file')
-    , socketOpen = false
+    , socketOpen = {}
     ;
   
   function startListening(request, response){
     var connectObj = connect.createServer()
       .use(getBody)
+      .use(function (req, res, next){ req.params = request.params; next(); })
       .use(readHttp);
-    serverHttp = connectObj.listen(request.params.portNum);
-    socketOpen = true;
+    serverHttp[request.params.portNum] = connectObj.listen(request.params.portNum);
+    socketOpen[request.params.portNum] = true;
     currentHttpPort = request.params.portNum;
-    serverHttp.on('close', function() {
+    serverHttp[request.params.portNum].on('close', function() {
       browserSocket.emit('closedConnection', request.params.portNum, 'http');
-      socketOpen = false;
+      socketOpen[request.params.portNum] = false;
     });
     response.end();
   }
@@ -51,40 +52,40 @@
         "headers": data
       , "body": req.rawBody
       , "protocol": 'http'
-    });
-    if(isLoggingHttp){
+    }, req.params.portNum);
+    if(isLoggingHttp[req.params.portNum]){
       if(includeHeaders) {
         httpBuffer += (data + req.rawBody + '\r\n\r\n');
       }
       else{
         httpBuffer += (req.rawBody + '\r\n\r\n');
       }
-      browserSocket.emit('seperateFiles', 'http');
+      browserSocket.emit('seperateFiles', 'http', req.params.portNum);
     }
     res.end('Hello from Connect!\n');
   }
 
-  function writeFile(logpath){
-    file.writeFile('http', httpBuffer, currentHttpPort, logpath, function(){httpBuffer = '';});
+  function writeFile(logpath, port){
+    file.writeFile('http', httpBuffer, port, logpath, function(){ httpBuffer = ''; });
   }
 
-  function toggleLog(logpath) {
-    if(!isLoggingHttp){
-      isLoggingHttp = true;
-      file.mkdir('http', currentHttpPort, logpath);
+  function toggleLog(logpath, port) {
+    if(!isLoggingHttp[port]){
+      isLoggingHttp[port] = true;
+      file.mkdir('http', port, logpath);
     }
     else{
-      isLoggingHttp = false;
+      isLoggingHttp[port] = false;
       if(httpBuffer){
         //write the file
-        writeFile(logpath);
+        writeFile(logpath, port);
       }
     }
   }
 
-  function close(){
-    if(socketOpen){
-      serverHttp.close();
+  function close(port){
+    if(socketOpen[port]){
+      serverHttp[port].close();
     }
   }
     
@@ -96,10 +97,7 @@
     browserSocket = socket;
   }
   function currentStatus() {
-    return {
-      "open": socketOpen,
-      "port": currentHttpPort
-    };
+    return socketOpen;
   }
 
   module.exports.currentStatus = currentStatus;

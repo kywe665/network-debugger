@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "steve": "~0.5.10",
+    "connect": "2.3.6",
     "socket.io": "~0.9.6",
     "connect_router": "~1.8.6",
     "pretty-data": "~0.30.3",
