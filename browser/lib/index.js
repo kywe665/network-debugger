@@ -84,7 +84,7 @@
     }, $(this).closest('.js-ui-tab-view').attr('data-name'));
   });
   $('.container').on('.js-clear', 'click', function(){
-    $('.js-'+$(this).attr('data-protocol')+'-stream').html('');
+    $(this).closest('.js-ui-tab-view').find('.js-'+$(this).attr('data-protocol')+'-stream').html('');
   });
   $('.container').on('.js-ui-tab-view:not(.css-inactive) .js-log', 'click', function(){
     if($(this).attr('data-protocol') === 'http'){
@@ -243,10 +243,10 @@
     var portName = port || options.protocol
       , selector = '.js-ui-tab-view[data-name="'+portName+'"]'
       ;
-    if($(selector +' .js-scroll.js-'+options.protocol).attr('checked')){
+    if($(selector +' .js-scroll.js-'+options.protocol).attr('checked') && $(selector +' .js-'+options.protocol+'-stream')[0].scrollHeight !== 0){
       $(selector + ' .js-'+options.protocol+'-stream')[0].scrollTop = $(selector +' .js-'+options.protocol+'-stream')[0].scrollHeight;
     }
-    if($(selector +' .js-'+options.protocol+'-stream')[0].scrollHeight > 6000){
+    if($(selector +' .js-'+options.protocol+'-stream').children().length > 4){
       console.log('cleared space: '+portName);
       $(selector +' .js-'+options.protocol+'-stream span').first().remove();
       $(selector +' .js-'+options.protocol+'-stream span').first().remove();
