@@ -108,9 +108,6 @@
       socket.emit('kill' + $(this).attr('data-protocol'));
     }
   });
-   $('.container').on('.js-ui-tab', 'click', function(){
-    setTimeout( scrollLock({protocol: $(this).attr('data-protocol')}), 100 );
-  });
 
   //EVENT LISTENERS HTTP
   $('.container').on('.js-include-headers', 'change', function(){
@@ -137,7 +134,7 @@
         var html, i;
         if(!resp.error){
           options.active = true;
-          visual.stateChange(protocol, port);
+          visual.stateChange(protocol, port, true);
           options.body += 'Socket opened succesfully. Listening on port: '+ port;
           options.cssClass = 'css-streamNewConnection';
         }
@@ -190,7 +187,7 @@
       socket.on('closedConnection', function(num, protocol){
         options.body = 'Closed Connection on '+num;
         options.cssClass = 'css-streamCloseConnection';
-        visual.stateChange(protocol, num);
+        visual.stateChange(protocol, num, false);
         options.protocol = protocol;
         injectMessage(options, 'default');
         injectMessage(options, num);
@@ -221,14 +218,14 @@
             options.protocol = protocol;
             injectMessage(options, 'default');
             injectMessage(options, port);
-            visual.stateChange(protocol, port);
+            visual.stateChange(protocol, port, true);
           }
         });
       }
       else{
         if(resp.result[protocol].open){
           options.protocol = protocol;
-          visual.stateChange(protocol, resp.result[protocol].port);
+          visual.stateChange(protocol, resp.result[protocol].port, true);
           options.body = 'Socket open. Listening on port: '+ resp.result[protocol].port;
           options.cssClass = 'css-streamNewConnection';
           options.protocol = protocol;
@@ -246,7 +243,7 @@
     if($(selector +' .js-scroll.js-'+options.protocol).attr('checked') && $(selector +' .js-'+options.protocol+'-stream')[0].scrollHeight !== 0){
       $(selector + ' .js-'+options.protocol+'-stream')[0].scrollTop = $(selector +' .js-'+options.protocol+'-stream')[0].scrollHeight;
     }
-    if($(selector +' .js-'+options.protocol+'-stream').children().length > 4){
+    if($(selector +' .js-'+options.protocol+'-stream').children().length > 9){
       console.log('cleared space: '+portName);
       $(selector +' .js-'+options.protocol+'-stream span').first().remove();
       $(selector +' .js-'+options.protocol+'-stream span').first().remove();
