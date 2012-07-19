@@ -25,6 +25,7 @@
     serverUdp.on("listening", function () {
       var address = serverUdp.address();
       socketOpen = true;
+      response.json({"error": false});
     });
     serverUdp.on("close", function () {
       browserSocket.emit('closedConnection', request.params.portNum, 'udp');
@@ -32,10 +33,10 @@
     });
     serverUdp.on("error", function (e) {
       console.log("UDP error: " + e);
+      response.json({"error": false});
     });
     serverUdp.bind(request.params.portNum);
     currentUdpPort = request.params.portNum;
-    response.end();
   }
 
   function writeFile(logpath){

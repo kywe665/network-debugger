@@ -58,18 +58,13 @@
     //If address in use, try again
     listener.on('error', function (e) {
       if (e.code == 'EADDRINUSE') {
-        console.log('Address in use, retrying...');
-        setTimeout(function () {
-          listener.close();
-          listener.listen(request.params.portNum, function() { //'listening' listener
-            console.log('server re-bound to '+ request.params.portNum);
-            success.listening = true;
-            response.json(success);
-            response.end();
-          });
-        }, 1000);
+        response.json({"error": 'That port is already in use!'});
+        response.end();
       }
-      else console.log('other error ',e);
+      else{
+        response.json({"error": e.code});
+        response.end();
+      }
     });
   }
 

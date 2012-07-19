@@ -99,9 +99,9 @@
     } 
 
     function router(rest) {
-      rest.get('/listentcp/:portNum', listenTcp);
-      rest.get('/listenhttp/:portNum', listenHttp);
-      rest.get('/listenudp/:portNum', listenUdp);
+      rest.post('/listentcp/:portNum', listenTcp);
+      rest.post('/listenhttp/:portNum', listenHttp);
+      rest.post('/listenudp/:portNum', listenUdp);
       rest.get('/onPageLoad', onPageLoad);
     }
 

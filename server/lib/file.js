@@ -22,6 +22,10 @@
       ext = '.kml';
     }
     filename = year+'-'+month+'-'+day+'_'+hours+'-'+minutes+'-'+seconds+'-'+milliseconds;
+    if(!buffer){
+      callback();
+      return;
+    }
     fs.writeFile(path.join(logpath, protocol, port, filename+ext), buffer
     , function (err) {
         if (err) throw err;

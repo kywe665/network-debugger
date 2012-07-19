@@ -30,7 +30,7 @@
       url: 'http://'+window.location.host+'/onPageLoad'
     , type: 'json'
     , method: 'get'
-    , error: function (err) { 
+    , error: function (err) {
         console.log('Server Error: ', err);
         options.body = 'Cannot communicate with netbug server';
         options.cssClass = 'css-streamError';
@@ -57,14 +57,16 @@
     $(this).toggleClass('css-hl-block');
   });
   $('.container').on('.js-ui-tab-view:not(.css-active) .js-openSocket', 'click', function(){
-    if($(this).attr('data-protocol') === 'http'){
-      var portNum = $('.js-portNum.js-http').val();
-      tabs.makeNew($(this).attr('data-protocol'), portNum);
+    var protocol = $(this).attr('data-protocol')
+      , port = $('.js-portNum.js-'+protocol).val()
+      ;
+    if(!port){
+      return;
     }
-    makeRequest($(this).attr('data-protocol'));
+    makeRequest(protocol, port);
 	});
   $('.container').on('.js-ui-tab-view:not(.css-active) .js-reopen', 'click', function(){
-    makeRequest($(this).attr('data-protocol'), $(this).attr('data-port'));
+    makeRequest($(this).attr('data-protocol'), $(this).attr('data-port'), true);
 	});
   $('.container').on('.js-ui-tab-view .js-close-tab', 'click', function(){
    var protocol = $(this).parent().attr('data-protocol')
@@ -114,7 +116,7 @@
     socket.emit('includeHeaders', $('.js-include-headers').attr('checked'));
   });
   
-  function makeRequest(protocol, portNum) {
+  function makeRequest(protocol, portNum, reopen) {
     var options = {}
       , port = portNum || $('.js-portNum.js-'+protocol).val()
       ;
@@ -123,16 +125,18 @@
     reqwest({
       url: 'http://'+window.location.host+'/listen'+protocol+'/'+port
     , type: 'json'
-    , method: 'get'
+    , method: 'post'
     , error: function (err) { 
-        console.log('Server Error: ', err);
         options.body = 'Cannot communicate with netbug server';
         options.cssClass = 'css-streamError';
         injectMessage(options);
       }
     , success: function (resp) {
         var html, i;
-        if(!resp.error){
+        if(!resp.error && !resp.result.error){
+          if(protocol === 'http' && !reopen){
+            tabs.makeNew(protocol, port);
+          }
           options.active = true;
           visual.stateChange(protocol, port, true);
           options.body += 'Socket opened succesfully. Listening on port: '+ port;
@@ -140,12 +144,18 @@
         }
         else{
           options.cssClass = 'css-streamError';
+          options.body += resp.result.error;
           for(i=0; i < resp.errors.length; i=i+1){
 						options.body += resp.errors[i].message;
 					}
         }
-        injectMessage(options, 'default');
-        injectMessage(options, port);
+        if(protocol === 'http'){
+          injectMessage(options, 'default');
+          injectMessage(options, port);
+        }
+        else{
+          injectMessage(options);
+        }
       }
     });
     openSocket(options);
@@ -189,8 +199,13 @@
         options.cssClass = 'css-streamCloseConnection';
         visual.stateChange(protocol, num, false);
         options.protocol = protocol;
-        injectMessage(options, 'default');
-        injectMessage(options, num);
+        if(protocol === 'http'){
+          injectMessage(options, 'default');
+          injectMessage(options, num);
+        }
+        else{
+          injectMessage(options);
+        }
       });
       socket.on('disconnect', function () { 
         console.log('Browser-Disconnected socket');
@@ -244,7 +259,7 @@
       $(selector + ' .js-'+options.protocol+'-stream')[0].scrollTop = $(selector +' .js-'+options.protocol+'-stream')[0].scrollHeight;
     }
     if($(selector +' .js-'+options.protocol+'-stream').children().length > 9){
-      console.log('cleared space: '+portName);
+      //console.log('cleared space: '+portName);
       $(selector +' .js-'+options.protocol+'-stream span').first().remove();
       $(selector +' .js-'+options.protocol+'-stream span').first().remove();
     }
