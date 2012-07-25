@@ -84,8 +84,10 @@
   }
 
   function writeFile(logpath, id){
-    file.writeFile('tcp', tcpBuffer[id], currentTcpPort, logpath, function(){tcpBuffer[id] = '';});
-    delete tcpBuffer[id];
+    file.writeFile('tcp', tcpBuffer[id], currentTcpPort, logpath, function(){
+      tcpBuffer[id] = '';
+      delete tcpBuffer[id];
+    });
   }
 
   function toggleLog(logpath) {
