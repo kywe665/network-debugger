@@ -69,9 +69,9 @@
         socket.on('killudp', function (port) {
           udpServer.close();
         });
-        socket.on('writeFile', function (protocol, port) { 
+        socket.on('writeFile', function (protocol, port, id) { 
           if (protocol === 'tcp'){
-            tcpServer.writeFile(logpath);
+            tcpServer.writeFile(logpath, id);
           }
           else if (protocol === 'http'){
             httpServer.writeFile(logpath, port);

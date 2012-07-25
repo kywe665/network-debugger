@@ -10,7 +10,7 @@
     , browserSocket
     , file = require('./file')
     , isLoggingTcp = false
-    , tcpBuffer = ''
+    , tcpBuffer = {}
     , currentTcpPort
     , socketOpen = false
     ;
@@ -28,10 +28,14 @@
       socketMap[openedConnections] = listenSocket;
       //set the message to empty string so null value is not coaxed to string
       tcpMsg[listenSocket.id] = '';
+      tcpBuffer[listenSocket.id] = '';
       openedConnections++;
       browserSocket.emit('connectionChange', openedConnections-closedConnections, false);
       //Event when Socket is closed
       listenSocket.on('close', function() {
+        if(isLoggingTcp){
+          browserSocket.emit('seperateFiles', 'tcp', null, listenSocket.id);
+        }
         closedConnections++;
         browserSocket.send(tcpMsg[listenSocket.id]);
         browserSocket.emit('connectionChange', openedConnections-closedConnections, true);
@@ -42,8 +46,7 @@
       listenSocket.on('data', function(data) {
         tcpMsg[listenSocket.id] += (data.toString());
         if(isLoggingTcp){
-          tcpBuffer += (data.toString() + '\r\n\r\n');
-          browserSocket.emit('seperateFiles', 'tcp');
+          tcpBuffer[listenSocket.id] += data.toString();
         }
       });
     });
@@ -80,8 +83,9 @@
     }
   }
 
-  function writeFile(logpath){
-    file.writeFile('tcp', tcpBuffer, currentTcpPort, logpath, function(){tcpBuffer = '';});
+  function writeFile(logpath, id){
+    file.writeFile('tcp', tcpBuffer[id], currentTcpPort, logpath, function(){tcpBuffer[id] = '';});
+    delete tcpBuffer[id];
   }
 
   function toggleLog(logpath) {
@@ -91,10 +95,6 @@
     }
     else{
       isLoggingTcp = false;
-      if(tcpBuffer){
-        //write the file
-        writeFile(logpath);
-      }
     }
   }
   

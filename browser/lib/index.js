@@ -176,9 +176,9 @@
       socket.on('udpData', function (msg) {
         injectCode('udp', msg);
       });
-      socket.on('seperateFiles', function (protocol, port) {
+      socket.on('seperateFiles', function (protocol, port, id) {
         if($('.js-'+protocol+'-multifile').attr('checked')) {
-          socket.emit('writeFile', protocol, port);
+          socket.emit('writeFile', protocol, port, id);
         }
       });
       socket.on('connectionChange', function (count, closed) {
