@@ -97,13 +97,14 @@
       var ids = Object.keys(tcpMsg)
         , firstMsg = ids[0]
         ;
-
+      if(ids.length < 1){
+        return;
+      }
       delete ids[0];
       ids.forEach(function(id){
         tcpMsg[firstMsg] += '\r\n\r\n' + tcpMsg[id];
         delete tcpMsg[id];
       });
-
       writeFile(logpath, firstMsg);
     }
   }
