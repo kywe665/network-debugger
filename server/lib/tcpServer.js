@@ -10,7 +10,6 @@
     , browserSocket
     , file = require('./file')
     , isLoggingTcp = false
-    , tcpBuffer = {}
     , currentTcpPort
     , socketOpen = false
     ;
@@ -22,34 +21,32 @@
       , filename
       ;
     success.socket = true;
-    listener = net.createServer(function(listenSocket) { //'connection' listener      
+    listener = net.createServer(function(listenSocket) { //'connection' listener
+      var socketData = '';
       //When a new socket is opened assign it a uid and map it.
       listenSocket.id = openedConnections;
       socketMap[openedConnections] = listenSocket;
-      //set the message to empty string so null value is not coaxed to string
-      tcpMsg[listenSocket.id] = '';
-      tcpBuffer[listenSocket.id] = '';
       openedConnections++;
       browserSocket.emit('connectionChange', openedConnections-closedConnections, false);
+
       //Event when Socket is closed
       listenSocket.on('close', function() {
-        if(isLoggingTcp){
-          browserSocket.emit('seperateFiles', 'tcp', null, listenSocket.id);
-        }
         closedConnections++;
-        browserSocket.send(tcpMsg[listenSocket.id]);
+        browserSocket.send(socketData);
         browserSocket.emit('connectionChange', openedConnections-closedConnections, true);
         delete socketMap[listenSocket.id];
-        delete tcpMsg[listenSocket.id];
-      });
-      //Event when data is transferred
-      listenSocket.on('data', function(data) {
-        tcpMsg[listenSocket.id] += (data.toString());
-        if(isLoggingTcp){
-          tcpBuffer[listenSocket.id] += data.toString();
+        if (isLoggingTcp) {
+          tcpMsg[listenSocket.id] = socketData;
+          browserSocket.emit('seperateFiles', 'tcp', null, listenSocket.id);
         }
       });
+
+      //Event when data is transferred
+      listenSocket.on('data', function(data) {
+        socketData += data.toString();
+      });
     });
+
     //bind the server to listen to the requested port
     listener.listen(request.params.portNum, function() { //'listening' listener
       currentTcpPort = request.params.portNum;
@@ -58,6 +55,7 @@
       response.json(success);
       response.end();
     });
+
     //If address in use, try again
     listener.on('error', function (e) {
       if (e.code == 'EADDRINUSE') {
@@ -84,10 +82,9 @@
   }
 
   function writeFile(logpath, id){
-    file.writeFile('tcp', tcpBuffer[id], currentTcpPort, logpath, function(){
-      tcpBuffer[id] = '';
-      delete tcpBuffer[id];
-    });
+    var data = tcpMsg[id];
+    delete tcpMsg[id];
+    file.writeFile('tcp', data, currentTcpPort, logpath, function () {});
   }
 
   function toggleLog(logpath) {
@@ -97,6 +94,17 @@
     }
     else{
       isLoggingTcp = false;
+      var ids = Object.keys(tcpMsg)
+        , firstMsg = ids[0]
+        ;
+
+      delete ids[0];
+      ids.forEach(function(id){
+        tcpMsg[firstMsg] += '\r\n\r\n' + tcpMsg[id];
+        delete tcpMsg[id];
+      });
+
+      writeFile(logpath, firstMsg);
     }
   }
   
