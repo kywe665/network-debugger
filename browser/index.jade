@@ -47,10 +47,16 @@ html(lang='en')
             li.js-ui-tab.js-default.css-default.css-hidden(data-protocol="http")
               a(href='/http/default')  + 
           .js-ui-tab-view.css-ui-tab-view(data-name='default')
-            p.css-enter-port Enter the port to listen on and click 'Listen'
+            p.css-enter-port Port number to listen on: 
             .css-listen-form
               input.js-portNum.js-http.css-portNum(type='text')(data-protocol='http')
               a.css-button.css-openSocket.js-openSocket.js-http(data-protocol='http') Listen
+            .css-poll-form
+              p.css-poll-url Url to poll: 
+              input.js-poll-url.js-http.css-poll-url(type='text')(data-protocol='http')
+              p.css-poll-interval Interval (milliseconds): 
+              input.js-poll-interval.css-poll-interval(type='text')(data-protocol='http')
+              a.css-button.css-poll-button.js-poll-button.js-http(data-protocol='http') Poll
             .js-http-stream.js-all-stream.css-stream
               span.js-allstream-error
             a.css-button.js-clear.js-http(data-protocol='http') Clear
