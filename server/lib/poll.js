@@ -21,9 +21,16 @@
         browserSocket.emit('pollTab', id);
       }
       res.setEncoding('utf8');
-      res.on('data', function (chunk) {
-        responseMsg += chunk;
-      });
+      try{
+        res.on('data', function (chunk) {
+          responseMsg += chunk;
+        });
+      }
+      catch(e){
+        console.log('ERROR: ');
+        console.log(e);
+        clearInterval(intervalMap[id]);
+      }
       res.on('end', function () {
         browserSocket.emit('pollData', id, res.statusCode, res.headers, responseMsg, null);
         if(first) {
