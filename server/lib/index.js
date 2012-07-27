@@ -10,6 +10,7 @@
     , tcpServer = require('./tcpServer')
     , httpServer = require('./httpServer')
     , udpServer = require('./udpServer')
+    , poll = require('./poll')
     , file = require('./file')
     , util = require('util')
     , browserSocket
@@ -55,6 +56,7 @@
         udpServer.assignSocket(socket);
         tcpServer.assignSocket(socket);
         httpServer.assignSocket(socket);
+        poll.assignSocket(socket);
         socket.on('message', function (data) {
         });
         socket.on('disconnect', function () { 
@@ -95,6 +97,8 @@
         socket.on('logudp', function(port) {
           udpServer.toggleLog(logpath);
         });
+        socket.on('poll', poll.init);
+        socket.on('stopPoll', poll.stopPoll);
       });
     } 
 

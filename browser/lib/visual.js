@@ -4,6 +4,8 @@
   var ender = require('ender')
     , $ = ender
     , hljs = require('hljs')
+    , pure = require('./pure-inject')
+    , pd = require('pretty-data').pd
     ;
   
   function stateChange(protocol, port, open){
@@ -56,8 +58,70 @@
     });
   }
 
+  function injectMessage(options, port) {
+    pure.injectMessage(options.protocol, {
+      'message': options.body,
+      'class': options.cssClass
+    }, port);
+    //scrollLock(options, port);
+  }
+
+  function injectCode(protocol, options, port) {
+    var data = {};      
+    data.code = options.headers || '';
+    data = processBody(options, data);
+    pure.injectCode(protocol, data, port);
+    options.protocol = protocol;
+    scrollLock(options, port);
+    highlightMsg(options);
+  }
+  
+  function processBody(options, data) {
+    var xml
+      , xml_pp
+      , json_pp
+      ;
+    //if xml
+    if(options.body.substring(0,3) === '<?x'){
+      xml_pp = pd.xml(options.body);
+      xml = xml_pp.replace(/&/g, '&amp;')
+                  .replace(/</g, '&lt;')
+                  .replace(/>/g, '&gt;');
+      data.xml = xml;
+    }
+    //if json
+    else if(options.body.charAt(0) === '{'){
+      json_pp = JSON.parse(options.body);
+      json_pp = JSON.stringify(json_pp, null, '  ');
+      json_pp = syntaxHighlight(json_pp);
+      data.code += json_pp;
+    }
+    else{
+      data.code += options.body;
+    }
+    return data;
+  }
+
+  function scrollLock(options, port) {
+    var portName = port || options.protocol
+      , selector = '.js-ui-tab-view[data-name="'+portName+'"]'
+      ;
+    if($(selector +' .js-scroll.js-'+options.protocol).attr('checked') && $(selector +' .js-'+options.protocol+'-stream')[0].scrollHeight !== 0){
+      $(selector + ' .js-'+options.protocol+'-stream')[0].scrollTop = $(selector +' .js-'+options.protocol+'-stream')[0].scrollHeight;
+    }
+    if($(selector +' .js-'+options.protocol+'-stream').children().length > 9){
+      //console.log('cleared space: '+portName);
+      $(selector +' .js-'+options.protocol+'-stream span').first().remove();
+      $(selector +' .js-'+options.protocol+'-stream span').first().remove();
+    }
+  }
+
   module.exports.stateChange = stateChange;
   module.exports.syntaxHighlight = syntaxHighlight;
   module.exports.highlightMsg = highlightMsg;
+  module.exports.injectMessage = injectMessage;
+  module.exports.injectCode = injectCode;
+  module.exports.processBody = processBody;
+  module.exports.scrollLock = scrollLock;
   
 }());

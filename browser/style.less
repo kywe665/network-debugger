@@ -163,9 +163,8 @@ body{
     background-color: #D1D1D1;
     margin-right: 15px;
     margin-left: 15px;
-    width: 70px;
+    width: 60px;
     text-align: right;
-    margin-bottom: 10px;
   }
   .css-log{
     &:before{
@@ -176,7 +175,8 @@ body{
     }
   }
   .css-enter-port{
-    float: left; 
+    color: #CCC;
+    float: left;
   }
   .css-log-options{
     float: right;
@@ -206,6 +206,25 @@ body{
     }
     .css-connection-status{
       background: -webkit-radial-gradient(center, ellipse cover, #AA3636 23%, #64665B 100%);
+    }
+  }
+}
+.css-poll-form{
+  span{
+    color: #CCC;
+    font-size: 15px;
+    &.css-poll-protocol{
+      color: #333;
+    }
+  }
+  input{
+    background-color: #D1D1D1;
+    margin-right: 10px;
+    &.css-poll-url{
+      width: 90px;
+    }
+    &.css-poll-interval{
+      width: 40px;
     }
   }
 }

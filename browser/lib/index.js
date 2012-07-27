@@ -18,6 +18,7 @@
     , pure = require('./pure-inject')
     , visual = require('./visual')
     , tabs = require('./newTab')
+    , poll = require('./poll-browser')
     ;
   
   $(document).ready(function() {
@@ -74,6 +75,9 @@
       ;
     socket.emit('kill' + protocol, port);
     tabs.closeTab(port, this);
+    if(port.indexOf('poll') !== -1){
+      socket.emit('stopPoll', port);
+    }
 	});
   $('.container').on('.js-ui-tab-view:not(.css-active) .js-portNum', 'keypress', function(e){
     if(e.keyCode === 13){
@@ -109,6 +113,21 @@
       $('.js-log.activeLog.js-'+$(this).attr('data-protocol')).trigger('click');
       socket.emit('kill' + $(this).attr('data-protocol'));
     }
+  });
+  $('.container').on('.js-poll-button', 'click', function(){
+    var url = $('.js-poll-url').val()
+      , interval = parseInt($('.js-poll-interval').val(), 10) || 1000
+      , id = poll.getId()
+      ;
+    if(!url){
+      injectMessage({
+        "protocol": "http",
+        "body": "Please enter a url to poll.",
+        "cssClass": "css-streamError"
+      }, 'default');
+      return;
+    }
+    socket.emit('poll', url, interval, id, true);
   });
 
   //EVENT LISTENERS HTTP
@@ -175,6 +194,12 @@
       });
       socket.on('udpData', function (msg) {
         injectCode('udp', msg);
+      });
+      socket.on('pollData', function (id, respStatus, headers, body, error) {
+        poll.formatMsg(id, respStatus, headers, body, error);
+      });
+      socket.on('pollTab', function(id) {
+        tabs.makeNew('http', id);
       });
       socket.on('seperateFiles', function (protocol, port, id) {
         if($('.js-'+protocol+'-multifile').attr('checked')) {

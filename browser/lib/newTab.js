@@ -18,6 +18,9 @@
     });
     notPure.injectTabView(port, protocol, 'js-'+protocol);
     changeToCurrent(port, protocol);
+    if(port.indexOf('poll') !== -1) {
+      deleteExtras(port);
+    }
   }
   
   function changeToCurrent(portNum, protocol){
@@ -35,6 +38,16 @@
       $('.js-ui-tab-view[data-name="http"] .js-tab-bar .js-default').addClass('css-hidden');
       $('.js-ui-tab-view[data-name="http"] .js-tab-container').css('margin-bottom', '0px');
     }
+  }
+
+  function deleteExtras(port) {
+    console.log($('.js-ui-tab-view[data-name="'+port+'"] .css-connection-info'));
+    $('.js-ui-tab-view[data-name="'+port+'"] .css-connection-info').remove();
+    $('.js-ui-tab-view[data-name="'+port+'"] .js-all-stream + .css-left.css-bottom').remove();
+    $('.js-ui-tab-view[data-name="'+port+'"] .js-all-stream + .css-center.css-bottom').remove();
+    $('.js-ui-tab-view[data-name="'+port+'"] .css-log-options + .css-top.right p').remove();
+    $('.js-ui-tab-view[data-name="'+port+'"] .css-log-options + .css-top.right input').remove();
+    $('.js-ui-tab-view[data-name="'+port+'"] .css-log-options').remove();
   }
 
   module.exports.makeNew = makeNew;
