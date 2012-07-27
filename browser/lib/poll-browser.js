@@ -50,7 +50,6 @@
       ;
     if(typeof body !== 'string'){
       try{
-        console.log('stringified');
         body = JSON.stringify(body);
       }
       catch(e){
@@ -66,7 +65,6 @@
     }
     //if xml or html
     if(body.substring(0,1) === '<'){
-      console.log(body);
       xml_pp = pd.xml(body);
       xml = xml_pp.replace(/&/g, '&amp;')
                   .replace(/</g, '&lt;')

@@ -8,6 +8,9 @@
     ;
 
   function init(path, interval, id, first) {
+    if(path.substring(0,7) !== 'http://'){
+      path = 'http://'+path;
+    }
     console.log('polling', path, interval);
     var options = url.parse(path, true)
       , req
