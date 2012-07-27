@@ -42,7 +42,7 @@
 
   function stopPoll(id) {
     console.log('stopped polling ' + id);
-    clearInterval(id);
+    clearInterval(intervalMap[id]);
   }
 
   function assignSocket (socket) {
