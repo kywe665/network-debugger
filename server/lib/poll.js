@@ -12,11 +12,11 @@
       path = 'http://'+path;
     }
     console.log('polling', path, interval);
-    var options = url.parse(path, true)
-      , req
-      ;
+    makeRequest(url.parse(path, true), interval, id, first);
+  }
 
-    req = http.request(options, function(res) {
+  function makeRequest(options, interval, id, first) {
+    var req = http.request(options, function(res) {
       var reqHeaders = req._header
         , responseMsg = '';
       
@@ -37,7 +37,7 @@
       res.on('end', function () {
         browserSocket.emit('pollData', id, res.statusCode, res.headers, responseMsg, null);
         if(first) {
-          intervalMap[id] = setInterval(init, interval, path, interval, id);
+          intervalMap[id] = setInterval(makeRequest, interval, options, interval, id);
         }
       });
     });
@@ -45,7 +45,7 @@
     req.on('error', function(e) {
       console.log('problem with request: ', e);
       if(first){
-        var err = 'Check your url and try again: ' + path;
+        var err = 'Check your url and try again: ';
         browserSocket.emit('pollData', 'default', null, null, null, err);
         return;
       }
@@ -53,7 +53,7 @@
       browserSocket.emit('pollData', id, null, null, null, e);
     });
 
-    req.end();
+    req.end();    
   }
 
   function stopPoll(id) {
@@ -69,3 +69,5 @@
   module.exports.assignSocket = assignSocket;
   module.exports.stopPoll = stopPoll;
 }());
+
+
