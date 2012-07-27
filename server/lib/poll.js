@@ -4,18 +4,18 @@
   var http = require('http')
     , url = require('url')
     , browserSocket
-    , intervalMap = {}
+    , timeoutMap = {}
     ;
 
   function init(path, interval, id, first) {
     if(path.substring(0,7) !== 'http://'){
       path = 'http://'+path;
     }
-    console.log('polling', path, interval);
     makeRequest(url.parse(path, true), interval, id, first);
   }
 
   function makeRequest(options, interval, id, first) {
+    console.log('polling', options.host, interval);
     var req = http.request(options, function(res) {
       var reqHeaders = req._header
         , responseMsg = '';
@@ -32,13 +32,12 @@
       catch(e){
         console.log('ERROR: ');
         console.log(e);
-        clearInterval(intervalMap[id]);
+        clearInterval(timeoutMap[id]);
       }
       res.on('end', function () {
+        var timeout = calculateTimeout();
         browserSocket.emit('pollData', id, res.statusCode, res.headers, responseMsg, null);
-        if(first) {
-          intervalMap[id] = setInterval(makeRequest, interval, options, interval, id);
-        }
+        timeoutMap[id] = setTimeout(makeRequest, interval, options, interval, id);
       });
     });
 
@@ -55,10 +54,14 @@
 
     req.end();    
   }
+  
+  function calculateTimeout() {
+    
+  }
 
   function stopPoll(id) {
     console.log('stopped polling ' + id);
-    clearInterval(intervalMap[id]);
+    clearInterval(timeoutMap[id]);
   }
 
   function assignSocket (socket) {
