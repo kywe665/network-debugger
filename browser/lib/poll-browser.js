@@ -5,31 +5,70 @@
     , visual = require('./visual')
     , ender = require('ender')
     , $ = ender
+    , pd = require('pretty-data').pd
     ;
 
   function formatMsg(id, respStatus, headers, body, error){
     var msg = 'STATUS: ' + respStatus + '\r\n'
-      , parseBody;
+      , data = processBody(body)
+      ;
     msg += 'HEADERS: \r\n' + prettyJson(headers) + '\r\n';
-    try{
-      parseBody = JSON.parse(body);
+    if(data.code){
+      msg += 'BODY: \r\n' + data.code + '\r\n';
     }
-    catch(e){
-      parseBody = body;
-    }
-    msg += 'BODY: \r\n' + prettyJson(parseBody) + '\r\n';
-    console.log(msg);
-    pure.injectCode('http', {'code': msg}, 'default');
-    pure.injectCode('http', {'code': msg}, id);
+    pure.injectCode('http', {'code': msg, 'xml': data.xml}, id);
+    visual.scrollLock({'protocol': 'http'}, id);
+    visual.highlightMsg({"protocol": "http"});
   }
 
   function prettyJson (json) {
     var json_pp = json;
-    console.log(json);
     //TODO add try catch in case it's not JSON
     json_pp = JSON.stringify(json, null, '  ');
     json_pp = visual.syntaxHighlight(json_pp);
     return json_pp;
+  }
+
+  function processBody(body) {
+    var xml
+      , xml_pp
+      , json_pp
+      , data = {}
+      ;
+    if(typeof body !== 'string'){
+      try{
+        body = JSON.stringify(body);
+      }
+      catch(e){
+        if(typeof body.toString() === 'string'){
+          body = body.toString();
+        }
+        else{
+          console.log('body not a string, unresolved datatype!');
+          data.code = body;
+          return data;
+        }
+      }
+    }
+    //if xml
+    if(body.substring(0,3) === '<?x'){
+      xml_pp = pd.xml(body);
+      xml = xml_pp.replace(/&/g, '&amp;')
+                  .replace(/</g, '&lt;')
+                  .replace(/>/g, '&gt;');
+      data.xml = xml;
+    }
+    //if json
+    else if(body.charAt(0) === '{'){
+      json_pp = JSON.parse(body);
+      json_pp = JSON.stringify(json_pp, null, '  ');
+      json_pp = visual.syntaxHighlight(json_pp);
+      data.code += json_pp;
+    }
+    else{
+      return {'code': body};
+    }
+    return data;
   }
 
   function getId() {

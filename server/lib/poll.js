@@ -8,7 +8,7 @@
     ;
 
   function init(path, interval, id, first) {
-    console.log('starting poll', path, interval);
+    console.log('polling', path, interval);
     var options = url.parse(path, true)
       , req
       ;
