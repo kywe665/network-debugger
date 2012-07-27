@@ -117,7 +117,7 @@
   $('.container').on('.js-poll-button', 'click', function(){
     var url = $('.js-poll-url').val()
       , interval = parseInt($('.js-poll-interval').val(), 10) || 1000
-      , id = poll.getId()
+      , id = 'poll' + ( parseInt($(this).attr('data-count'), 10)+1 ) //poll.getId()
       ;
     if(!url){
       injectMessage({
@@ -199,6 +199,8 @@
         poll.formatMsg(id, respStatus, headers, body, error);
       });
       socket.on('pollTab', function(id) {
+        var current = parseInt($('.js-poll-button').attr('data-count'), 10);
+        $('.js-poll-button').attr('data-count', current+1);
         tabs.makeNew('http', id);
       });
       socket.on('seperateFiles', function (protocol, port, id) {

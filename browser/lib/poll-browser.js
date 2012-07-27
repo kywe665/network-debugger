@@ -103,3 +103,4 @@
   module.exports.formatMsg = formatMsg;
   module.exports.getId = getId;
 }());
+
