@@ -12,12 +12,25 @@
     var msg = 'STATUS: ' + respStatus + '\r\n'
       , data = processBody(body)
       ;
-    msg += 'HEADERS: \r\n' + prettyJson(headers) + '\r\n';
-    if(data.code){
-      msg += 'BODY: \r\n' + data.code + '\r\n';
+    if(error){
+      pure.injectMessage('http', {
+        "message": prettyJson(error),
+        "class": "css-streamError"
+      }, 'default');
+      pure.injectMessage('http', {
+        "message": prettyJson(error),
+        "class": "css-streamError"
+      }, id);
     }
-    pure.injectCode('http', {'code': msg, 'xml': data.xml}, id);
+    else{
+      msg += 'HEADERS: \r\n' + prettyJson(headers) + '\r\n';
+      if(data.code){
+        msg += 'BODY: \r\n' + data.code + '\r\n';
+      }
+      pure.injectCode('http', {'code': msg, 'xml': data.xml}, id);
+    }
     visual.scrollLock({'protocol': 'http'}, id);
+    visual.scrollLock({'protocol': 'http'}, 'default');
     visual.highlightMsg({"protocol": "http"});
   }
 
@@ -37,6 +50,7 @@
       ;
     if(typeof body !== 'string'){
       try{
+        console.log('stringified');
         body = JSON.stringify(body);
       }
       catch(e){
@@ -50,8 +64,9 @@
         }
       }
     }
-    //if xml
-    if(body.substring(0,3) === '<?x'){
+    //if xml or html
+    if(body.substring(0,1) === '<'){
+      console.log(body);
       xml_pp = pd.xml(body);
       xml = xml_pp.replace(/&/g, '&amp;')
                   .replace(/</g, '&lt;')
@@ -66,7 +81,11 @@
       data.code += json_pp;
     }
     else{
-      return {'code': body};
+      return {
+        'code': body.replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;')
+      };
     }
     return data;
   }

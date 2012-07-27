@@ -41,6 +41,12 @@
 
     req.on('error', function(e) {
       console.log('problem with request: ', e);
+      if(first){
+        var err = 'Check your url and try again: ' + path;
+        browserSocket.emit('pollData', 'default', null, null, null, err);
+        return;
+      }
+      browserSocket.emit('pollData', 'default', null, null, null, e);
       browserSocket.emit('pollData', id, null, null, null, e);
     });
 
