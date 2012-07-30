@@ -17,45 +17,51 @@
 
   function makeRequest(options, interval, id, first) {
     console.log('polling', options.host, interval);
-    try{
-      var timeSent = Date.now()
-        , req = http.request(options, function(res) {
-        var responseMsg = '';
-        if(first) {
-          browserSocket.emit('pollTab', id);
-          pollFlag[id] = true;
-        }
-        res.setEncoding('utf8');
-        res.on('data', function (chunk) {
-          responseMsg += chunk;
-        });
-        res.on('end', function () {
-          var timeout = calculateTimeout(interval, timeSent);
-          console.log('timeout:', timeout);
-          browserSocket.emit('pollData', id, res.statusCode, res.headers, responseMsg, null);
-          timeoutMap[id] = setTimeout(pollAgain, timeout, options, interval, id);
-        });
+    var timeSent = Date.now()
+      , req
+      ;
+    req = http.request(options, function(res) {
+      var responseMsg = '';
+      if(first) {
+        browserSocket.emit('pollTab', id);
+        pollFlag[id] = true;
+      }
+      res.setEncoding('utf8');
+      res.on('data', function (chunk) {
+        responseMsg += chunk;
       });
-
-      req.on('error', function(e) {
-        console.log('problem with request: ', e);
-        if(first){
-          var err = 'Check your url and try again: ';
-          browserSocket.emit('pollData', 'default', null, null, null, err);
-          return;
-        }
-        browserSocket.emit('pollData', 'default', null, null, null, e);
-        browserSocket.emit('pollData', id, null, null, null, e);
+      res.on('end', function () {
+        var timeout = calculateTimeout(interval, timeSent);
+        console.log('timeout:', timeout);
+        browserSocket.emit('pollData', id, res.statusCode, res.headers, responseMsg, null);
+        timeoutMap[id] = setTimeout(pollAgain, timeout, options, interval, id);
       });
+    });
 
-      req.end();
-    }
-    catch(e){
-      console.log('ERROR: ');
-      console.log(e);
-      clearTimeout(timeoutMap[id]);
-      pollFlag[id] = false;
-    }
+    req.on('error', function(e) {
+      console.log('problem with request: ', e);
+      if(first){
+        var err = 'Check your url and try again: ';
+        browserSocket.emit('pollData', 'default', null, null, null, err);
+        return;
+      }
+      browserSocket.emit('pollData', 'default', null, null, null, e);
+      browserSocket.emit('pollData', id, null, null, null, e);
+      if(e.code === 'ECONNRESET'){
+        timeoutMap[id] = setTimeout(pollAgain, interval, options, interval, id);
+      }
+    });
+
+    req.on('socket', function(socket) {
+      socket.on('error', function(error) {
+        console.log('ERROR: ');
+        console.log(error);
+        browserSocket.emit('pollData', 'default', null, null, null, error);
+        browserSocket.emit('pollData', id, null, null, null, error);
+      });
+    });
+
+    req.end();
   }
   
   function pollAgain(options, interval, id) {
