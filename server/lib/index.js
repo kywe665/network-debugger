@@ -10,8 +10,6 @@
     , tcpServer = require('./tcpServer')
     , httpServer = require('./httpServer')
     , udpServer = require('./udpServer')
-    , file = require('./file')
-    , util = require('util')
     , browserSocket
     , Socket = require('socket.io')
     , io = Socket.listen(3454)
@@ -25,7 +23,7 @@
     openSockets();
     //function when a GET request is sent to /listenUDP
     function listenUdp(request, response) {
-      udpServer.startListening(request, response);
+      udpServer.startListening(request, response, logpath);
     }
 
     //function when a GET request is sent to /listenHTTP
@@ -67,14 +65,11 @@
           httpServer.close(port);
         });
         socket.on('killudp', function (port) {
-          udpServer.close();
+          udpServer.closeListener(function () {}, port);
         });
         socket.on('writeFile', function (protocol, port, id) {
           if (protocol === 'http'){
             httpServer.writeFile(logpath, port);
-          }
-          else if (protocol === 'udp'){
-            udpServer.writeFile(logpath);
           }
         });
         socket.on('close', function () {
@@ -89,8 +84,8 @@
         socket.on('loghttp', function(port) {
           httpServer.toggleLog(logpath, port);
         });
-        socket.on('logudp', function(port) {
-          udpServer.toggleLog(logpath);
+        socket.on('logudp', function(port, logData, separateFiles) {
+          udpServer.changeLogSettings(port, logData, separateFiles);
         });
       });
     }
