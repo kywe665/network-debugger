@@ -1,140 +1,253 @@
 /*jshint strict:true node:true es5:true onevar:true laxcomma:true laxbreak:true*/
 (function () {
   "use strict";
-  var connect = require('connect')
-    , app = connect.createServer()
-    , serverHttp = {}
-    , currentHttpPort
-    , browserSocket
-    , isLoggingHttp = {}
-    , httpBuffer = ''
-    , includeHeaders = false
+
+  var http = require('http')
+    , path = require('path')
     , file = require('./file')
-    , socketOpen = {}
+    , listeners = {}
+    , browserSocket
     ;
-  
-  function startListening(request, response){
-    var connectObj = connect.createServer()
-      .use(getBody)
-      .use(function (req, res, next){ req.params = request.params; next(); })
-      .use(readHttp);
-    if(serverHttp[request.params.portNum]){
-      response.json({"error": 'That port is already in use!'});
-      browserSocket.emit('httpData', {
-          "headers": ''
-        , "body": 'That port is already being used!'
-        , "protocol": 'http'
-      }, request.params.portNum);
-      return;
-    }
-    serverHttp[request.params.portNum] = connectObj.listen(request.params.portNum,function(){
-      response.json({"error": false});
-      socketOpen[request.params.portNum] = true;
-      currentHttpPort = request.params.portNum;
-    });
-    serverHttp[request.params.portNum].on('error', function(err) {
-      browserSocket.emit('httpData', {
-          "headers": ''
-        , "body": 'That port is already being used!'
-        , "protocol": 'http'
-      }, request.params.portNum);
-      if(err.code === 'EADDRINUSE'){
-        response.json({"error": 'That port is already in use!'});
-      }
-      else{
-        response.json({"error": err.code});
-      }
-    });
-    serverHttp[request.params.portNum].on('close', function() {
-      browserSocket.emit('closedConnection', request.params.portNum, 'http');
-      socketOpen[request.params.portNum] = false;
-      delete serverHttp[request.params.portNum];
-    });
-  }
-
-  function getBody(req, res, next) {
-    var data = ''
-      ;
-    req.on('data', function (chunk) {
-      data += chunk.toString('utf8');
-    });
-    req.on('end', function() {
-      req.rawBody = data;
-      next();
-    });
-  }
-
-  function readHttp (req, res){
-    var data = ''
-      ;
-    data += req.method.toUpperCase() + ' ' + req.url + ' ' + 'HTTP/' + req.httpVersion + '\r\n';
-    Object.keys(req.headers).forEach(function (key) {
-      data += key + ': ' + req.headers[key] + '\r\n';
-    });
-    data += '\r\n';
-    browserSocket.emit('httpData', {
-        "headers": data
-      , "body": req.rawBody
-      , "protocol": 'http'
-    }, req.params.portNum);
-    if(isLoggingHttp[req.params.portNum]){
-      if(includeHeaders) {
-        httpBuffer += (data + req.rawBody + '\r\n\r\n');
-      }
-      else{
-        httpBuffer += (req.rawBody + '\r\n\r\n');
-      }
-      browserSocket.emit('seperateFiles', 'http', req.params.portNum);
-    }
-    res.end('Hello from Connect!\n');
-  }
-
-  function writeFile(logpath, port){
-    file.writeFile('http', httpBuffer, port, logpath, function(){ httpBuffer = ''; });
-  }
-
-  function toggleLog(logpath, port) {
-    if(!isLoggingHttp[port]){
-      isLoggingHttp[port] = true;
-      file.mkdir('http', port, logpath);
-    }
-    else{
-      isLoggingHttp[port] = false;
-      if(httpBuffer){
-        //write the file
-        writeFile(logpath, port);
-      }
-    }
-  }
-
-  function close(port){
-    if(socketOpen[port]){
-      try{
-        serverHttp[port].close();
-      } 
-      catch(e){
-        console.log('critical error: ', e);
-      }
-    }
-  }
-    
-  function headers(bool){
-    includeHeaders = bool;
-  }
 
   function assignSocket (socket) {
     browserSocket = socket;
   }
-  function currentStatus() {
-    return socketOpen;
+
+  function printErr(err, port) {
+    console.error('HTTP port', port, 'server error:', err);
   }
 
-  module.exports.currentStatus = currentStatus;
-  module.exports.toggleLog = toggleLog;
-  module.exports.writeFile = writeFile;
-  module.exports.close = close;
-  module.exports.headers = headers;
-  module.exports.assignSocket = assignSocket;
-  module.exports.startListening = startListening;
-  
+  function currentStatus() {
+    var openPorts = Object.keys(listeners)
+      ;
+
+    openPorts = openPorts.sort();
+
+    return openPorts.map(function (portNum) {
+      return {
+          portNum: portNum
+        , connectionCount: listeners[portNum].connections.length
+        , logSettings: listeners[portNum].logSettings
+      };
+    });
+  }
+
+  function restringifyHeaders(req) {
+    var headers = ''
+      ;
+
+    headers += req.method.toUpperCase() + ' ' + req.url + ' ' + 'HTTP/' + req.httpVersion + '\r\n';
+    Object.keys(req.headers).forEach(function (key) {
+      headers += key + ': ' + req.headers[key] + '\r\n';
+    });
+    headers += '\r\n';
+
+    return headers;
+  }
+
+  function createHttpListener(callback, port, logPath) {
+    var server = http.createServer()
+      , connections   = []
+      , finishedData  = []
+      , logSettings   = {}
+      ;
+
+    // wrap the callback so we never accidently call
+    // the one we were given more than once
+    function callbackWrapper(err) {
+      callback(err, port);
+      callback = printErr;
+    }
+
+    if (listeners.hasOwnProperty(port)) {
+      callbackWrapper({message: "Already listening for HTTP on port " + port});
+      return;
+    }
+
+    server.on('error', callbackWrapper);
+
+    server.on('connection', function (socket) {
+      connections.push(socket);
+      if (connections.length !== server.connections) {
+        callbackWrapper('connections list out of sync: expected', server.connections, 'found', connections.length);
+      }
+
+      socket.on('close', function () {
+        var index = connections.indexOf(socket);
+
+        if (index < 0) {
+          callbackWrapper('got a close event for socket not in connections list');
+        }
+        else {
+          connections.splice(index, 1);
+        }
+        if (connections.length !== server.connections) {
+          callbackWrapper('connections list out of sync: expected', server.connections, 'found', connections.length);
+        }
+      });
+    });
+
+    server.on('request', function (request, response) {
+      var body = '';
+
+      request.on('data', function (chunk) {
+        body += chunk.toString('utf8');
+      });
+
+      request.on('end', function () {
+        var headers = restringifyHeaders(request)
+          , loggableData
+          ;
+
+        response.end('Hello from Netbug');
+
+        browserSocket.emit('httpData', {
+            protocol: 'http'
+          , port: port
+          , headers: headers
+          , body: body
+        }, port);
+
+        if (logSettings.logData) {
+          if (logSettings.includeHeader) {
+            loggableData = headers + body;
+          }
+          else {
+            loggableData = body;
+          }
+
+          if (logSettings.separateFile) {
+            file.writeData(logSettings.logPath, loggableData);
+          }
+          else {
+            finishedData.push(loggableData);
+          }
+        }
+      });
+    });
+
+    server.on('close', function () {
+      if (finishedData.length > 0) {
+        file.writeData(logSettings.logPath, finishedData.join('\r\n\r\n'));
+        // fastest way to clear an array is to set length to 0
+        finishedData.length = 0;
+      }
+
+      browserSocket.emit('closedConnection', port, 'http');
+      delete listeners[port];
+    });
+
+    server.on('listening', function () {
+      var error
+        ;
+
+      // make sure the port we report is actually the one we are listening on
+      error = (port && port !== server.address().port) ? {message: "Listening port doesn't match specified port"} : null;
+      port  = server.address().port;
+
+      logSettings.logPath = path.resolve(logPath, 'http', port.toString());
+      logSettings.logData = false;
+      logSettings.separateFiles   = false;
+      logSettings.includeHeaders  = false;
+
+      // seal logSettings so nothing will be deleted or added (prevent stupid typos)
+      Object.seal(logSettings);
+
+      listeners[port] = {};
+      listeners[port].server        = server;
+      listeners[port].connections   = connections;
+      listeners[port].finishedData  = finishedData;
+      listeners[port].logSettings   = logSettings;
+
+      // now freeze the listener so the references can't be changed or lost
+      Object.freeze(listeners[port]);
+
+      callbackWrapper(error);
+    });
+
+    server.listen(port);
+  }
+
+  //Open Sockets to listen on network TCP
+  function startListening (request, response, logPath) {
+    function serverCreated(error, port) {
+      var success = {}
+        ;
+
+      if (error) {
+        response.error(error);
+        response.json();
+        return;
+      }
+
+      success.socket = true;
+      success.listening = port;
+      response.json(success);
+    }
+
+    createHttpListener(serverCreated, request.params.portNum, logPath);
+  }
+
+  // Change whether or not we should log, and it we should log packets separately
+  function changeLogSettings(port, logData, separateFiles, includeHeaders) {
+    var listener = listeners[port]
+      ;
+
+    if (logData) {
+      file.mkdir(listener.logSettings.logPath);
+    }
+    if (listener.finishedData.length > 0 && (!logData || separateFiles)) {
+      file.writeData(listener.logSettings.logPath, listener.finishedData.join('\r\n\r\n'));
+      // fastest way to clear an array is to set length to 0
+      listener.finishedData.length = 0;
+    }
+
+    listener.logSettings.logData        = logData;
+    listener.logSettings.separateFiles  = separateFiles;
+    listener.logSettings.includeHeaders = includeHeaders;
+  }
+
+  //When user requests to close the connection
+  function closeHttpListener(callback, port) {
+    var timeoutId
+      , error
+      ;
+
+    if (!listeners[port]) {
+      callback({message: 'No HTTP listener on specified port ' + port});
+      return;
+    }
+
+    // give all of the connections 2 seconds to finish themselves before we destroy them
+    timeoutId = setTimeout(function () {
+      var connections = listeners[port].connections
+        ;
+      timeoutId = null;
+      if (connections.length <= 0) {
+        error = 'timeout not cleared even though no connections open';
+        printErr(error, port);
+        return;
+      }
+
+      error = 'forced to destroy remaining ' + connections.length + ' connection(s)';
+      printErr(error, port);
+      connections.forEach(function (socket) {
+        socket.destroy();
+      });
+    }, 2000);
+
+    listeners[port].server.close(function () {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+      callback(error ? {message: error} : null);
+    });
+  }
+
+  module.exports.assignSocket       = assignSocket;
+  module.exports.currentStatus      = currentStatus;
+  module.exports.startListening     = startListening;
+  module.exports.changeLogSettings  = changeLogSettings;
+  module.exports.closeListener      = closeHttpListener;
+
 }());

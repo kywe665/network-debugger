@@ -5,8 +5,8 @@
   var dgram = require('dgram')
     , path = require('path')
     , file = require('./file')
-    , browserSocket
     , listeners = {}
+    , browserSocket
     ;
 
   function assignSocket (socket) {
@@ -37,9 +37,16 @@
       , logSettings   = {}
       ;
 
+    // wrap the callback so we never accidently call
+    // the one we were given more than once
     function callbackWrapper(err) {
       callback(err, port);
       callback = printErr;
+    }
+
+    if (listeners.hasOwnProperty(port)) {
+      callbackWrapper({message: "Already listening for UDP on port " + port});
+      return;
     }
 
     server.on('error', callbackWrapper);
@@ -140,7 +147,7 @@
   //When user requests to close the connection
   function closeUdpListener(callback, port) {
     if (!listeners[port]) {
-      callback({message: 'No listener on specified port ' + port});
+      callback({message: 'No UDP listener on specified port ' + port});
       return;
     }
 

@@ -5,8 +5,8 @@
   var net = require('net')
     , path = require('path')
     , file = require('./file')
-    , browserSocket
     , listeners = {}
+    , browserSocket
     ;
 
   function assignSocket (socket) {
@@ -26,7 +26,7 @@
     return openPorts.map(function (portNum) {
       return {
           portNum: portNum
-        , connectionCount: listeners[portNum].connection.length
+        , connectionCount: listeners[portNum].connections.length
         , logSettings: listeners[portNum].logSettings
       };
     });
@@ -44,6 +44,11 @@
     function callbackWrapper(err) {
       callback(err, port);
       callback = printErr;
+    }
+
+    if (listeners.hasOwnProperty(port)) {
+      callbackWrapper({message: "Already listening for TCP on port " + port});
+      return;
     }
 
     function handleConnection(socket) {
@@ -176,7 +181,7 @@
       ;
 
     if (!listeners[port]) {
-      callback({message: 'No listener on specified port ' + port});
+      callback({message: 'No TCP listener on specified port ' + port});
       return;
     }
 
