@@ -7,7 +7,7 @@
     ;
 
   function injectTabView(port, protocol, newClass){
-    var template = 
+    var template =
       '<div data-name="'+port+'" class="js-ui-tab-view css-ui-tab-view js-all css-inactive">'+
         '<div class="css-log-options">'+
           '<input type="checkbox" class="js-include-headers">'+

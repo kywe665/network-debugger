@@ -19,7 +19,7 @@
     , visual = require('./visual')
     , tabs = require('./newTab')
     ;
-  
+
   $(document).ready(function() {
     var options = {};
     options.protocol = 'all';
@@ -51,7 +51,7 @@
       }
     });
   });
-  
+
   //EVENT LISTENERS ALL
   $('.container').on('.js-all-stream pre', 'click', function(){
     $(this).toggleClass('css-hl-block');
@@ -115,7 +115,7 @@
   $('.container').on('.js-include-headers', 'change', function(){
     socket.emit('includeHeaders', $('.js-include-headers').attr('checked'));
   });
-  
+
   function makeRequest(protocol, portNum, reopen) {
     var options = {}
       , port = portNum || $('.js-portNum.js-'+protocol).val()
@@ -126,7 +126,7 @@
       url: 'http://'+window.location.host+'/listen'+protocol+'/'+port
     , type: 'json'
     , method: 'post'
-    , error: function (err) { 
+    , error: function (err) {
         options.body = 'Cannot communicate with netbug server';
         options.cssClass = 'css-streamError';
         injectMessage(options);
@@ -160,8 +160,8 @@
     });
     openSocket(options);
   }
- 
-//SOCKET COMMUNICATION WITH SERVER 
+
+//SOCKET COMMUNICATION WITH SERVER
   function openSocket(options) {
     socket = io.connect('http://'+window.location.hostname+':3454');
     socket.on('connect', function () {
@@ -207,7 +207,7 @@
           injectMessage(options);
         }
       });
-      socket.on('disconnect', function () { 
+      socket.on('disconnect', function () {
         console.log('Browser-Disconnected socket');
         options.cssClass = 'css-streamError';
         options.body = 'NetBug Server Down';
@@ -219,8 +219,8 @@
       });
     });
   }
-  
-  function initBuild(resp){
+
+  function initBuild(resp) {
     var options = {};
     options.body = '';
     Object.keys(resp.result).forEach(function(protocol){
@@ -249,7 +249,7 @@
         }
       }
     });
-  }  
+  }
 
   function scrollLock(options, port) {
     var portName = port || options.protocol
@@ -274,7 +274,7 @@
   }
 
   function injectCode(protocol, options, port) {
-    var data = {};      
+    var data = {};
     data.code = options.headers || '';
     data = processBody(options, data);
     pure.injectCode(protocol, data, port);
@@ -282,7 +282,7 @@
     scrollLock(options, port);
     visual.highlightMsg(options);
   }
-  
+
   function processBody(options, data) {
     var xml
       , xml_pp

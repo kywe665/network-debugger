@@ -61,7 +61,7 @@
       $('.js-'+protocol+'-stream').append(addTime() + messageTemplate(data));
     }
   }
-  
+
   function injectCode(protocol, data, port) {
     if(port){
       $('.js-ui-tab-view[data-name="'+port+'"] .js-'+protocol+'-stream').append(addTime() + codeTemplate(data));
@@ -70,7 +70,7 @@
       $('.js-'+protocol+'-stream').append(addTime() + codeTemplate(data));
     }
   }
-  
+
   function addTime () {
     return timestampTemplate({'time': new Date().toString()});
   }

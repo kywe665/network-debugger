@@ -19,13 +19,13 @@
     notPure.injectTabView(port, protocol, 'js-'+protocol);
     changeToCurrent(port, protocol);
   }
-  
+
   function changeToCurrent(portNum, protocol){
     window.location.hash = '/'+protocol+'/'+portNum;
     $('.js-default').removeClass('css-hidden');
     $('.js-tab-container').css('margin-bottom', '20px');
   }
-  
+
   function closeTab(port, that) {
     $('.js-log.activeLog.js-'+port).trigger('click');
     $(that).closest('.js-tab-template').remove();

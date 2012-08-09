@@ -164,8 +164,8 @@ $p.core = function(sel, ctxt, plugins){
 				return strs.join('');
 			}catch(e){
 				if(console && console.log){
-					console.log( e.stack ? 
-						e.stack : 
+					console.log( e.stack ?
+						e.stack :
 						e.message + ' (' + e.type + ', ' + e.arguments.join('-') + '). Use Firefox or Chromium/Chrome to get a full stack of the error. ' );
 				}
 				return '';
@@ -196,7 +196,7 @@ $p.core = function(sel, ctxt, plugins){
 		if( typeof(sel) === 'function' ){
 			//handle false values in function directive
 			return function ( ctxt ){
-				var r = sel.call( ctxt.item || ctxt.context || ctxt, ctxt ); 
+				var r = sel.call( ctxt.item || ctxt.context || ctxt, ctxt );
 				return !r && r !== 0 ? '' : r;
 			};
 		}
@@ -241,14 +241,14 @@ $p.core = function(sel, ctxt, plugins){
 			}
 			var n = m.length,
 				dm;
-				
+
 			for(; i < n; i++){
 				if(!data){break;}
 				dm = data[ m[i] ];
 				//if it is a function call it
 				data = typeof dm === 'function' ? data[ m[i] ].call( data ) : dm;
 			}
-			
+
 			return (!data && data !== 0) ? '':data;
 		};
 	}

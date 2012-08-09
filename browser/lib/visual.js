@@ -5,7 +5,7 @@
     , $ = ender
     , hljs = require('hljs')
     ;
-  
+
   function stateChange(protocol, port, open){
     if(protocol === 'all'){
       $('.js-ui-tab-view.js-all').addClass('css-inactive');
@@ -28,7 +28,7 @@
       $('.js-ui-tab-view[data-name="'+port+'"]').addClass('css-inactive');
     }
   }
-  
+
   function syntaxHighlight(json) {
     json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
     return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g
@@ -59,5 +59,5 @@
   module.exports.stateChange = stateChange;
   module.exports.syntaxHighlight = syntaxHighlight;
   module.exports.highlightMsg = highlightMsg;
-  
+
 }());
