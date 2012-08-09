@@ -165,15 +165,8 @@
     socket = io.connect('http://'+window.location.hostname+':3454');
     socket.on('connect', function () {
       socket.send('hi');
-      socket.on('message', function (msg) {
-        options.body = msg;
-        injectCode('tcp', options);
-      });
-      socket.on('httpData', function (msg, port) {
-        injectCode('http', msg, port);
-      });
-      socket.on('udpData', function (msg) {
-        injectCode('udp', msg);
+      socket.on('listenerData', function (msg) {
+        preInjectCode(msg);
       });
       socket.on('seperateFiles', function (protocol, port, id) {
         if($('.js-'+protocol+'-multifile').attr('checked')) {
@@ -259,13 +252,13 @@
     scrollLock(options, port);
   }
 
-  function injectCode(protocol, options, port) {
+  function preInjectCode(options) {
     var data = {};
     data.code = options.headers || '';
     data = processBody(options, data);
-    pure.injectCode(protocol, data, port);
-    options.protocol = protocol;
-    scrollLock(options, port);
+
+    pure.injectCode(options, data);
+    scrollLock(options, options.port);
     visual.highlightMsg(options);
   }
 

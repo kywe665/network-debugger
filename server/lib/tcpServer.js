@@ -85,7 +85,12 @@
           callbackWrapper('connections list out of sync: expected', server.connections, 'found', connections.length);
         }
 
-        browserSocket.send(socketData);
+        browserSocket.emit('listenerData', {
+            protocol: 'tcp'
+          , port: port
+          , body: socketData
+        });
+
         browserSocket.emit('connectionChange', connections.length, true);
         if (logSettings.logData) {
           if (logSettings.separateFiles) {

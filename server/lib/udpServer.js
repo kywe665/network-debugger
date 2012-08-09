@@ -61,7 +61,12 @@
       var message = msg.toString('utf8')
         ;
 
-      browserSocket.emit('udpData', {protocol: 'udp', port: port, body: message});
+      browserSocket.emit('listenerData', {
+          protocol: 'udp'
+        , port: port
+        , body: message
+      });
+
       if (logSettings.logData) {
         if (logSettings.separateFiles) {
           file.writeData(logSettings.logPath, message);

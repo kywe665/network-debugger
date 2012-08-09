@@ -107,12 +107,12 @@
 
         response.end('Hello from Netbug');
 
-        browserSocket.emit('httpData', {
+        browserSocket.emit('listenerData', {
             protocol: 'http'
           , port: port
           , headers: headers
           , body: body
-        }, port);
+        });
 
         if (logSettings.logData) {
           if (logSettings.includeHeader) {

@@ -62,13 +62,20 @@
     }
   }
 
-  function injectCode(protocol, data, port) {
-    if(port){
-      $('.js-ui-tab-view[data-name="'+port+'"] .js-'+protocol+'-stream').append(addTime() + codeTemplate(data));
+  function injectCode(options, data) {
+    var stream;
+
+    if (!options.hasOwnProperty('protocol')) {
+      console.error('received code injection request without protocol');
+      return;
     }
-    else{
-      $('.js-'+protocol+'-stream').append(addTime() + codeTemplate(data));
+    if (!options.hasOwnProperty('port')) {
+      console.error('received code injection request without port');
+      return;
     }
+
+    stream = $('.js-ui-tab-view[data-name="'+options.port+'"] .js-'+options.protocol+'-stream');
+    stream.append(addTime() + codeTemplate(data));
   }
 
   function addTime () {
