@@ -35,7 +35,7 @@
 
     //function when a GET request is sent to /listenTCP
     function listenTcp(request, response) {
-      tcpServer.startListening(request, response);
+      tcpServer.startListening(request, response, logpath);
     }
 
     function onPageLoad(request, response){
@@ -46,7 +46,7 @@
       });
       response.end();
     }
-    
+
     //Browser Comm Sockets
     function openSockets() {
       io.sockets.on('connection', function (socket) {
@@ -57,11 +57,11 @@
         httpServer.assignSocket(socket);
         socket.on('message', function (data) {
         });
-        socket.on('disconnect', function () { 
+        socket.on('disconnect', function () {
           console.log('Browser disconnected');
         });
         socket.on('killtcp', function (port) {
-          tcpServer.closeAllSockets();
+          tcpServer.closeListener(function () {}, port);
         });
         socket.on('killhttp', function (port) {
           httpServer.close(port);
@@ -69,25 +69,22 @@
         socket.on('killudp', function (port) {
           udpServer.close();
         });
-        socket.on('writeFile', function (protocol, port, id) { 
-          if (protocol === 'tcp'){
-            tcpServer.writeFile(logpath, id);
-          }
-          else if (protocol === 'http'){
+        socket.on('writeFile', function (protocol, port, id) {
+          if (protocol === 'http'){
             httpServer.writeFile(logpath, port);
           }
           else if (protocol === 'udp'){
             udpServer.writeFile(logpath);
           }
         });
-        socket.on('close', function () { 
+        socket.on('close', function () {
           console.log('ClOsEd Socket');
         });
-        socket.on('includeHeaders', function (bool) { 
+        socket.on('includeHeaders', function (bool) {
           httpServer.headers(bool);
         });
-        socket.on('logtcp', function(port) {
-          tcpServer.toggleLog(logpath);
+        socket.on('logtcp', function(port, logData, separateFiles) {
+          tcpServer.changeLogSettings(port, logData, separateFiles);
         });
         socket.on('loghttp', function(port) {
           httpServer.toggleLog(logpath, port);
@@ -96,7 +93,7 @@
           udpServer.toggleLog(logpath);
         });
       });
-    } 
+    }
 
     function router(rest) {
       rest.post('/listentcp/:portNum', listenTcp);
@@ -108,9 +105,10 @@
     app.use(connect.favicon());
     app.use(connect.static(__dirname + '/../../webclient-deployed'));
     app.use(connect.router(router));
-    
+
     return app;
   }
-    module.exports.create = create;
+
+  module.exports.create = create;
 }());
 
