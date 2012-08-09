@@ -89,6 +89,36 @@
       response.json(summary);
     }
 
+    function getListeners(request, response) {
+      var manager = listenerControl[request.params.protocol]
+        , openPorts
+        , foundSpecified
+        ;
+
+      if (!manager) {
+        response.error('Unsupported protocol ' + request.params.protocol);
+        return response.json();
+      }
+      openPorts = manager.currentStatus();
+
+      if (!request.params.hasOwnProperty('portNum')) {
+        response.json(openPorts);
+        return;
+      }
+
+      foundSpecified = openPorts.some(function (listener) {
+        if (listener.portNum === request.params.portNum) {
+          response.json(listener);
+          return true;
+        }
+      });
+
+      if (!foundSpecified) {
+        response.error('Not listening for ' + request.params.protocol + ' on port ' + request.params.portNum);
+        response.json();
+      }
+    }
+
     function startListening(request, response) {
       var manager = listenerControl[request.params.protocol]
         ;
@@ -116,9 +146,46 @@
       manager.createListener(listenerCreated, request.params.portNum, logPath);
     }
 
+    function changeSettings(request, response) {
+      var manager = listenerControl[request.params.protocol]
+        , retVal
+        ;
+
+      if (!manager) {
+        response.error('Unsupported protocol ' + request.params.protocol);
+        return response.json();
+      }
+
+      retVal = manager.changeLogSettings(request.params.portNum, request.body);
+      response.json(retVal);
+    }
+
+    function stopListening(request, response) {
+      var manager = listenerControl[request.params.protocol]
+        ;
+
+      if (!manager) {
+        response.error('Unsupported protocol ' + request.params.protocol);
+        return response.json();
+      }
+
+      function listenerDestroyed(error) {
+        if (error) {
+          response.error(error);
+        }
+        response.json();
+      }
+
+      manager.closeListener(listenerDestroyed, request.params.portNum);
+    }
+
     function router(rest) {
       rest.get('/onPageLoad', onPageLoad);
+      rest.get('/listeners/:protocol', getListeners);
+      rest.get('/listeners/:protocol/:portNum', getListeners);
       rest.post('/listeners/:protocol/:portNum', startListening);
+      rest.put('/listeners/:protocol/:portNum', changeSettings);
+      rest.del('/listeners/:protocol/:portNum', stopListening);
     }
 
     app = connect.createServer();

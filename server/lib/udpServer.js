@@ -107,21 +107,34 @@
   }
 
   // Change whether or not we should log, and it we should log packets separately
-  function changeLogSettings(port, logData, separateFiles) {
-    var listener = listeners[port]
+  function changeLogSettings(port, newSettings) {
+    var logSettings = listeners[port].logSettings
+      , finishedData = listeners[port].finishedData
+      , unusedKeys = []
       ;
 
-    if (logData) {
-      file.mkdir(listener.logSettings.logPath);
+    Object.keys(newSettings).forEach(function (key) {
+      if (logSettings.hasOwnProperty(key) && key !== 'logPath') {
+        logSettings[key] = newSettings[key];
+      }
+      else {
+        unusedKeys.push(key);
+      }
+    });
+
+    if (logSettings.logData) {
+      file.mkdir(logSettings.logPath);
     }
-    if (listener.finishedData.length > 0 && (!logData || separateFiles)) {
-      file.writeData(listener.logSettings.logPath, listener.finishedData.join('\r\n\r\n'));
+    if (finishedData.length > 0 && (!logSettings.logData || logSettings.separateFiles)) {
+      file.writeData(logSettings.logPath, finishedData.join('\r\n\r\n'));
       // fastest way to clear an array is to set length to 0
-      listener.finishedData.length = 0;
+      finishedData.length = 0;
     }
 
-    listener.logSettings.logData       = logData;
-    listener.logSettings.separateFiles = separateFiles;
+    return {
+        logSettings: logSettings
+      , unusedKeys: unusedKeys
+    };
   }
 
   //When user requests to close the connection
