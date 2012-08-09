@@ -97,7 +97,8 @@
 
       if (!manager) {
         response.error('Unsupported protocol ' + request.params.protocol);
-        return response.json();
+        response.json();
+        return;
       }
       openPorts = manager.currentStatus();
 
@@ -105,7 +106,13 @@
         response.json(openPorts);
         return;
       }
+      if (isNaN(request.params.portNum)) {
+        response.error('Specified port must be a number');
+        response.json();
+        return;
+      }
 
+      request.params.portNum = Number(request.params.portNum);
       foundSpecified = openPorts.some(function (listener) {
         if (listener.portNum === request.params.portNum) {
           response.json(listener);
@@ -127,20 +134,21 @@
         response.error('Unsupported protocol ' + request.params.protocol);
         return response.json();
       }
+      if (isNaN(request.params.portNum)) {
+        response.error('Specified port must be a number');
+        response.json();
+        return;
+      }
 
       function listenerCreated(error, port) {
-        var success = {}
-          ;
-
         if (error) {
           response.error(error);
           response.json();
           return;
         }
 
-        success.socket = true;
-        success.listening = port;
-        response.json(success);
+        request.params.portNum = port;
+        getListeners(request, response);
       }
 
       manager.createListener(listenerCreated, request.params.portNum, logPath);
@@ -155,6 +163,11 @@
         response.error('Unsupported protocol ' + request.params.protocol);
         return response.json();
       }
+      if (isNaN(request.params.portNum)) {
+        response.error('Specified port must be a number');
+        response.json();
+        return;
+      }
 
       retVal = manager.changeLogSettings(request.params.portNum, request.body);
       response.json(retVal);
@@ -167,6 +180,11 @@
       if (!manager) {
         response.error('Unsupported protocol ' + request.params.protocol);
         return response.json();
+      }
+      if (isNaN(request.params.portNum)) {
+        response.error('Specified port must be a number');
+        response.json();
+        return;
       }
 
       function listenerDestroyed(error) {

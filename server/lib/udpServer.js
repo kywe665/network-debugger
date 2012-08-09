@@ -25,7 +25,7 @@
 
     return openPorts.map(function (portNum) {
       return {
-          portNum: portNum
+          portNum: Number(portNum)
         , logSettings: listeners[portNum].logSettings
       };
     });
@@ -44,8 +44,14 @@
       callback = printErr;
     }
 
+    if (isNaN(port)) {
+      callbackWrapper('Specified port must be a number');
+      return;
+    }
+
+    port = Number(port);
     if (listeners.hasOwnProperty(port)) {
-      callbackWrapper({message: "Already listening for UDP on port " + port});
+      callbackWrapper('Already listening for UDP on port ' + port);
       return;
     }
 
@@ -82,7 +88,7 @@
         ;
 
       // make sure the port we report is actually the one we are listening on
-      error = (port && port !== server.address().port) ? {message: "Listening port doesn't match specified port"} : null;
+      error = (port && port !== server.address().port) ? "Listening port doesn't match specified port" : null;
       port  = server.address().port;
 
       logSettings.logPath = path.resolve(logPath, 'udp', port.toString());
