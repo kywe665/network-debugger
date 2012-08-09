@@ -160,45 +160,34 @@
     openSocket(options);
   }
 
-//SOCKET COMMUNICATION WITH SERVER
+  //SOCKET COMMUNICATION WITH SERVER
   function openSocket(options) {
     socket = io.connect('http://'+window.location.hostname+':3454');
+
     socket.on('connect', function () {
       socket.send('hi');
+
       socket.on('listenerData', function (msg) {
         preInjectCode(msg);
       });
-      socket.on('seperateFiles', function (protocol, port, id) {
-        if($('.js-'+protocol+'-multifile').attr('checked')) {
-          socket.emit('writeFile', protocol, port, id);
-        }
+
+      socket.on('connectionChange', function (msg) {
+        console.log('TODO: implement connectionChange:', msg.protocol, msg.port, msg.count);
+        //$('.js-tcp-connection-count').html(count);
       });
-      socket.on('connectionChange', function (count, closed) {
-        $('.js-tcp-connection-count').html(count);
-        if(closed){
-          options.body = 'Socket Closed';
-          options.cssClass = 'css-streamCloseConnection';
-        }
-        else{
-          options.body = 'New Socket Opened';
-          options.cssClass = 'css-streamNewConnection';
-        }
-        options.protocol = 'tcp';
-        injectMessage(options);
-      });
-      socket.on('closedConnection', function(num, protocol){
-        options.body = 'Closed Connection on '+num;
+
+      socket.on('listenerClosed', function(msg) {
+        var options = {};
+
+        options.body = msg.protocol.toUpperCase() + ' Listener on port ' + msg.port + ' closed';
         options.cssClass = 'css-streamCloseConnection';
-        visual.stateChange(protocol, num, false);
-        options.protocol = protocol;
-        if(protocol === 'http'){
-          injectMessage(options, 'default');
-          injectMessage(options, num);
-        }
-        else{
-          injectMessage(options);
-        }
+        options.protocol = msg.protocol;
+        injectMessage(options, 'default');
+        injectMessage(options, msg.port);
+
+        visual.stateChange(msg.protocol, msg.port, false);
       });
+
       socket.on('disconnect', function () {
         console.log('Browser-Disconnected socket');
         options.cssClass = 'css-streamError';
@@ -209,6 +198,7 @@
         $('.js-log.activeLog').trigger('click');
         visual.stateChange('all');
       });
+
     });
   }
 

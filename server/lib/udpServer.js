@@ -84,7 +84,10 @@
         finishedData.length = 0;
       }
 
-      browserSocket.emit('closedConnection', port, 'udp');
+      browserSocket.emit('listenerClosed', {
+          protocol: 'udp'
+        , port: port
+      });
       delete listeners[port];
     });
 

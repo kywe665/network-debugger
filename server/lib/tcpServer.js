@@ -65,7 +65,11 @@
       if (connections.length !== server.connections) {
         callbackWrapper('connections list out of sync: expected', server.connections, 'found', connections.length);
       }
-      browserSocket.emit('connectionChange', server.connections, false);
+      browserSocket.emit('connectionChange', {
+          protocol: 'http'
+        , port: port
+        , count: server.connections
+      });
 
       socket.on('data', function (data) {
         socketData += data.toString();
@@ -84,6 +88,11 @@
         if (connections.length !== server.connections) {
           callbackWrapper('connections list out of sync: expected', server.connections, 'found', connections.length);
         }
+        browserSocket.emit('connectionChange', {
+            protocol: 'http'
+          , port: port
+          , count: server.connections
+        });
 
         browserSocket.emit('listenerData', {
             protocol: 'tcp'
@@ -91,7 +100,6 @@
           , body: socketData
         });
 
-        browserSocket.emit('connectionChange', connections.length, true);
         if (logSettings.logData) {
           if (logSettings.separateFiles) {
             file.writeData(logSettings.logPath, socketData);
@@ -113,7 +121,10 @@
         finishedData.length = 0;
       }
 
-      browserSocket.emit('closedConnection', port, 'tcp');
+      browserSocket.emit('listenerClosed', {
+          protocol: 'tcp'
+        , port: port
+      });
       delete listeners[port];
     });
 
@@ -191,6 +202,11 @@
 
     // give all of the connections 2 seconds to finish themselves before we destroy them
     timeoutId = setTimeout(function () {
+      if (!listeners[port]) {
+        console.error('timeout not cleared even though server is closed');
+        return;
+      }
+
       var connections = listeners[port].connections
         ;
       timeoutId = null;
@@ -207,12 +223,14 @@
       });
     }, 2000);
 
-    listeners[port].server.close(function () {
+    // this was originally server.close(cb), but the cb was never called
+    listeners[port].server.once('close', function () {
       if (timeoutId) {
         clearTimeout(timeoutId);
       }
-      callback(error ? {message: error} : null);
+      callback(error);
     });
+    listeners[port].server.close();
   }
 
   module.exports.assignSocket       = assignSocket;
