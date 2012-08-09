@@ -114,6 +114,12 @@
       // now freeze the listener so the references can't be changed or lost
       Object.freeze(listeners[port]);
 
+      browserSocket.emit('listenerCreated', {
+          protocol: 'udp'
+        , port: port
+        , logSettings: logSettings
+      });
+
       callbackWrapper(error);
     });
 
@@ -144,6 +150,12 @@
       // fastest way to clear an array is to set length to 0
       finishedData.length = 0;
     }
+
+    browserSocket.emit('listenerChanged', {
+        protocol: 'udp'
+      , port: port
+      , logSettings: logSettings
+    });
 
     return {
         logSettings: logSettings

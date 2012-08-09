@@ -254,11 +254,15 @@
   });
 
   //SOCKET COMMUNICATION WITH SERVER
-  function openSocket(options) {
+  function openSocket() {
     socket = io.connect('http://'+window.location.hostname+':3454');
 
     socket.on('connect', function () {
       socket.send('hi');
+
+      socket.on('listenerCreated', function (msg) {
+        console.log('TODO: implement listenerCreated:', msg.protocol, msg.port, msg.logSettings);
+      });
 
       socket.on('listenerData', function (msg) {
         preInjectCode(msg);
@@ -267,6 +271,10 @@
       socket.on('connectionChange', function (msg) {
         console.log('TODO: implement connectionChange:', msg.protocol, msg.port, msg.count);
         //$('.js-tcp-connection-count').html(count);
+      });
+
+      socket.on('listenerChanged', function (msg) {
+        console.log('TODO: implement listenerChanged:', msg.protocol, msg.port, msg.logSettings);
       });
 
       socket.on('listenerClosed', function(msg) {
@@ -282,6 +290,8 @@
       });
 
       socket.on('disconnect', function () {
+        var options = {};
+
         console.log('Browser-Disconnected socket');
         options.cssClass = 'css-streamError';
         options.body = 'NetBug Server Down';

@@ -66,7 +66,7 @@
         callbackWrapper('connections list out of sync: expected', server.connections, 'found', connections.length);
       }
       browserSocket.emit('connectionChange', {
-          protocol: 'http'
+          protocol: 'tcp'
         , port: port
         , count: server.connections
       });
@@ -89,7 +89,7 @@
           callbackWrapper('connections list out of sync: expected', server.connections, 'found', connections.length);
         }
         browserSocket.emit('connectionChange', {
-            protocol: 'http'
+            protocol: 'tcp'
           , port: port
           , count: server.connections
         });
@@ -152,6 +152,12 @@
       // now freeze the listener so the references can't be changed or lost
       Object.freeze(listeners[port]);
 
+      browserSocket.emit('listenerCreated', {
+          protocol: 'tcp'
+        , port: port
+        , logSettings: logSettings
+      });
+
       callbackWrapper(error);
     });
 
@@ -182,6 +188,12 @@
       // fastest way to clear an array is to set length to 0
       finishedData.length = 0;
     }
+
+    browserSocket.emit('listenerChanged', {
+        protocol: 'tcp'
+      , port: port
+      , logSettings: logSettings
+    });
 
     return {
         logSettings: logSettings
