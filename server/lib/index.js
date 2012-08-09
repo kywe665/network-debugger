@@ -54,12 +54,13 @@
     websocketServer.sockets.on('connection', function (socket) {
       connectedSockets.push(socket);
 
+      console.log('Browser socket connected (count = ' + connectedSockets.length + ')');
       socket.on('disconnect', function () {
         var index = connectedSockets.indexOf(socket)
           ;
         if (index >= 0) {
           connectedSockets.splice(index, 1);
-          console.log('Browser socket disconnected');
+          console.log('Browser socket disconnected (count = ' + connectedSockets.length + ')');
         }
         else {
           console.error('Received disconnect event from unlisted browser socket');
@@ -70,7 +71,7 @@
           ;
         if (index >= 0) {
           connectedSockets.splice(index, 1);
-          console.log('Browser socket closed');
+          console.log('Browser socket closed (count = ' + connectedSockets.length + ')');
         }
         else {
           console.error('Received close event from unlisted browser socket');

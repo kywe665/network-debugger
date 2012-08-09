@@ -123,7 +123,7 @@
     options.body = '';
     options.protocol = protocol;
     reqwest({
-      url: 'http://'+window.location.host+'/listen'+protocol+'/'+port
+      url: 'http://'+window.location.host+'/listeners/'+protocol+'/'+port
     , type: 'json'
     , method: 'post'
     , error: function (err) {
@@ -133,29 +133,28 @@
       }
     , success: function (resp) {
         var html, i;
-        if(!resp.error && !resp.result.error){
-          if(protocol === 'http' && !reopen){
+        if (!resp.error && !resp.result.error) {
+          port = resp.result.portNum;
+          if (!reopen) {
             tabs.makeNew(protocol, port);
           }
           options.active = true;
           visual.stateChange(protocol, port, true);
-          options.body += 'Socket opened succesfully. Listening on port: '+ port;
+          options.body += protocol.toUpperCase() + ' listener succesfully opened on port '+ port;
           options.cssClass = 'css-streamNewConnection';
         }
-        else{
+        else {
           options.cssClass = 'css-streamError';
-          options.body += resp.result.error;
-          for(i=0; i < resp.errors.length; i=i+1){
-						options.body += resp.errors[i].message;
-					}
+          if (resp.result.hasOwnProperty('error')) {
+            options.body += resp.result.error;
+          }
+          resp.errors.forEach(function (error) {
+            options.body += error.message;
+          });
         }
-        if(protocol === 'http'){
-          injectMessage(options, 'default');
-          injectMessage(options, port);
-        }
-        else{
-          injectMessage(options);
-        }
+
+        injectMessage(options, 'default');
+        injectMessage(options, port);
       }
     });
     openSocket(options);
@@ -223,30 +222,17 @@
   function initBuild(resp) {
     var options = {};
     options.body = '';
-    Object.keys(resp.result).forEach(function(protocol){
-      if(protocol === 'http' && Object.keys(resp.result[protocol]).length > 0){
-        Object.keys(resp.result[protocol]).forEach(function(port){
-          if(resp.result[protocol][port]){
-            tabs.makeNew(protocol, port);
-            options.body = 'Socket open. Listening on port: '+ port;
-            options.cssClass = 'css-streamNewConnection';
-            options.protocol = protocol;
-            injectMessage(options, 'default');
-            injectMessage(options, port);
-            visual.stateChange(protocol, port, true);
-          }
-        });
-      }
-      else{
-        if(resp.result[protocol].open){
-          options.protocol = protocol;
-          visual.stateChange(protocol, resp.result[protocol].port, true);
-          options.body = 'Socket open. Listening on port: '+ resp.result[protocol].port;
+    Object.keys(resp.result).forEach(function (protocol) {
+      if (resp.result[protocol].length > 0) {
+        resp.result[protocol].forEach(function (listener) {
+          tabs.makeNew(protocol, listener.portNum);
+          options.body = protocol.toUpperCase() + ' listener open on port '+ listener.portNum;
           options.cssClass = 'css-streamNewConnection';
           options.protocol = protocol;
-          injectMessage(options, resp.result[protocol].port);
-          $('.js-portNum.js-'+protocol).val(resp.result[protocol].port);
-        }
+          injectMessage(options, 'default');
+          injectMessage(options, listener.portNum);
+          visual.stateChange(protocol, listener.portNum, true);
+        });
       }
     });
   }
