@@ -20,6 +20,145 @@
     , tabs = require('./newTab')
     ;
 
+  function openListener(protocol, port, reopen) {
+    var options = {}
+      ;
+
+    options.body = '';
+    options.protocol = protocol;
+    options.port = port;
+
+    reqwest({
+      url: 'http://'+window.location.host+'/listeners/'+protocol+'/'+port
+    , type: 'json'
+    , method: 'post'
+    , error: function (err) {
+        options.body = 'Cannot communicate with netbug server';
+        options.cssClass = 'css-streamError';
+        injectMessage(options);
+      }
+    , success: function (resp) {
+        if (!resp.error && resp.result && !resp.result.error) {
+          port = resp.result.portNum;
+          if (!reopen) {
+            tabs.makeNew(protocol, port);
+          }
+          options.active = true;
+          visual.stateChange(protocol, port, true);
+          options.body += protocol.toUpperCase() + ' listener succesfully opened on port '+ port;
+          options.cssClass = 'css-streamNewConnection';
+        }
+        else {
+          options.cssClass = 'css-streamError';
+          if (resp.hasOwnProperty('result') && resp.result.hasOwnProperty('error')) {
+            options.body += resp.result.error;
+          }
+          if (Array.isArray(resp.errors)) {
+            resp.errors.forEach(function (error) {
+              options.body += error.message;
+            });
+          }
+          if (!options.body) {
+            options.body = 'Unknown error opening linstener';
+          }
+        }
+
+        injectMessage(options, 'default');
+        injectMessage(options, port);
+      }
+    });
+  }
+
+  function setListenerLogging(protocol, port, settings) {
+    var options = {}
+      ;
+
+    options.body = '';
+    options.protocol = protocol;
+    options.port = port;
+
+    reqwest({
+      url: 'http://'+window.location.host+'/listeners/'+protocol+'/'+port
+    , type: 'json'
+    , method: 'put'
+    , body: settings
+    , error: function (err) {
+        options.body = 'Cannot communicate with netbug server';
+        options.cssClass = 'css-streamError';
+        injectMessage(options);
+      }
+    , success: function (resp) {
+        // If there wasn't an error, we will get the event listenerChanged,
+        // which should trigger anything we would want to do on success
+        if (!resp.error && resp.result && !resp.result.error) {
+          return;
+        }
+
+        options.body = '';
+        options.cssClass = 'css-streamError';
+        if (resp.hasOwnProperty('result') && resp.result.hasOwnProperty('error')) {
+          options.body += resp.result.error;
+        }
+        if (Array.isArray(resp.errors)) {
+          resp.errors.forEach(function (error) {
+            options.body += error.message;
+          });
+        }
+        if (!options.body) {
+          options.body = 'Unknown error changing log settings for listener';
+        }
+
+        injectMessage(options, 'default');
+        injectMessage(options, options.port);
+      }
+    });
+
+  }
+
+  function closeListener(protocol, port) {
+    var options = {}
+      ;
+
+    options.protocol = protocol;
+    options.port = port;
+
+    reqwest({
+      url: 'http://'+window.location.host+'/listeners/' + options.protocol + '/' + options.port
+    , type: 'json'
+    , method: 'del'
+    , error: function (err) {
+        options.body = 'Cannot communicate with netbug server';
+        options.cssClass = 'css-streamError';
+        injectMessage(options, 'default');
+        injectMessage(options, options.port);
+      }
+    , success: function (resp) {
+        // If there wasn't an error, we will get the event listenerClosed,
+        // which should trigger anything we would want to do on success
+        if (!resp.error && resp.result && !resp.result.error) {
+          return;
+        }
+
+        options.body = '';
+        options.cssClass = 'css-streamError';
+        if (resp.hasOwnProperty('result') && resp.result.hasOwnProperty('error')) {
+          options.body += resp.result.error;
+        }
+        if (Array.isArray(resp.errors)) {
+          resp.errors.forEach(function (error) {
+            options.body += error.message;
+          });
+        }
+        if (!options.body) {
+          options.body = 'Unknown error closing listener';
+        }
+
+        injectMessage(options, 'default');
+        injectMessage(options, options.port);
+      }
+    });
+  }
+
   $(document).ready(function() {
     var options = {};
     options.protocol = 'all';
@@ -31,7 +170,7 @@
     , type: 'json'
     , method: 'get'
     , error: function (err) {
-        console.log('Server Error: ', err);
+        console.error('Server Error: ', err);
         options.body = 'Cannot communicate with netbug server';
         options.cssClass = 'css-streamError';
         injectMessage(options);
@@ -63,10 +202,10 @@
     if(!port){
       return;
     }
-    makeRequest(protocol, port);
+    openListener(protocol, port);
 	});
   $('.container').on('.js-ui-tab-view:not(.css-active) .js-reopen', 'click', function(){
-    makeRequest($(this).attr('data-protocol'), $(this).attr('data-port'), true);
+    openListener($(this).attr('data-protocol'), $(this).attr('data-port'), true);
 	});
   $('.container').on('.js-ui-tab-view .js-close-tab', 'click', function(){
    var protocol = $(this).parent().attr('data-protocol')
@@ -99,66 +238,20 @@
       $(this).toggleClass('activeLog');
     }
   });
-  $('.container').on('.js-ui-tab-view:not(.css-inactive) .js-closeSocket', 'click', function(){
-    if($(this).attr('data-protocol') === 'http'){
-      var port = $(this).closest('.js-ui-tab-view').attr('data-name');
-      $('.js-log.activeLog.js-'+port).trigger('click');
-      socket.emit('kill' + $(this).attr('data-protocol'), port);
-    }
-    else{
-      $('.js-log.activeLog.js-'+$(this).attr('data-protocol')).trigger('click');
-      socket.emit('kill' + $(this).attr('data-protocol'));
-    }
+  $('.container').on('.js-ui-tab-view:not(.css-inactive) .js-closeSocket', 'click', function() {
+    var protocol = $(this).attr('data-protocol')
+      , port = $(this).closest('.js-ui-tab-view').attr('data-name')
+      ;
+
+    $('.js-log.activeLog.js-' + port).trigger('click');
+
+    closeListener(protocol, port);
   });
 
   //EVENT LISTENERS HTTP
   $('.container').on('.js-include-headers', 'change', function(){
     socket.emit('includeHeaders', $('.js-include-headers').attr('checked'));
   });
-
-  function makeRequest(protocol, portNum, reopen) {
-    var options = {}
-      , port = portNum || $('.js-portNum.js-'+protocol).val()
-      ;
-    options.body = '';
-    options.protocol = protocol;
-    reqwest({
-      url: 'http://'+window.location.host+'/listeners/'+protocol+'/'+port
-    , type: 'json'
-    , method: 'post'
-    , error: function (err) {
-        options.body = 'Cannot communicate with netbug server';
-        options.cssClass = 'css-streamError';
-        injectMessage(options);
-      }
-    , success: function (resp) {
-        var html, i;
-        if (!resp.error && !resp.result.error) {
-          port = resp.result.portNum;
-          if (!reopen) {
-            tabs.makeNew(protocol, port);
-          }
-          options.active = true;
-          visual.stateChange(protocol, port, true);
-          options.body += protocol.toUpperCase() + ' listener succesfully opened on port '+ port;
-          options.cssClass = 'css-streamNewConnection';
-        }
-        else {
-          options.cssClass = 'css-streamError';
-          if (resp.result.hasOwnProperty('error')) {
-            options.body += resp.result.error;
-          }
-          resp.errors.forEach(function (error) {
-            options.body += error.message;
-          });
-        }
-
-        injectMessage(options, 'default');
-        injectMessage(options, port);
-      }
-    });
-    openSocket(options);
-  }
 
   //SOCKET COMMUNICATION WITH SERVER
   function openSocket(options) {
@@ -257,6 +350,16 @@
       , xml_pp
       , json_pp
       ;
+
+    if (!data) {
+      data = {};
+    }
+    if (!options || !options.hasOwnProperty('body')) {
+      console.error('options has no body:', JSON.stringify(options));
+      data.code += 'No Body';
+      return data;
+    }
+
     //if xml
     if(options.body.substring(0,3) === '<?x'){
       xml_pp = pd.xml(options.body);
