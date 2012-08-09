@@ -166,7 +166,7 @@
   //When user requests to close the connection
   function closeUdpListener(callback, port) {
     if (!listeners[port]) {
-      callback({message: 'No UDP listener on specified port ' + port});
+      callback('No UDP listener on specified port ' + port);
       return;
     }
 

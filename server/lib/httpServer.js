@@ -237,7 +237,7 @@
       ;
 
     if (!listeners[port]) {
-      callback({message: 'No HTTP listener on specified port ' + port});
+      callback('No HTTP listener on specified port ' + port);
       return;
     }
 

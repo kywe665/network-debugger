@@ -208,7 +208,7 @@
       ;
 
     if (!listeners[port]) {
-      callback({message: 'No TCP listener on specified port ' + port});
+      callback('No TCP listener on specified port ' + port);
       return;
     }
 
