@@ -106,26 +106,6 @@
     server.bind(port);
   }
 
-  //Open Sockets to listen on network TCP
-  function startListening (request, response, logPath) {
-    function serverCreated(error, port) {
-      var success = {}
-        ;
-
-      if (error) {
-        response.error(error);
-        response.json();
-        return;
-      }
-
-      success.socket = true;
-      success.listening = port;
-      response.json(success);
-    }
-
-    createUdpListener(serverCreated, request.params.portNum, logPath);
-  }
-
   // Change whether or not we should log, and it we should log packets separately
   function changeLogSettings(port, logData, separateFiles) {
     var listener = listeners[port]
@@ -154,10 +134,9 @@
     listeners[port].server.close(callback);
   }
 
-
   module.exports.assignSocket       = assignSocket;
   module.exports.currentStatus      = currentStatus;
-  module.exports.startListening     = startListening;
+  module.exports.createListener     = createUdpListener;
   module.exports.changeLogSettings  = changeLogSettings;
   module.exports.closeListener      = closeUdpListener;
 
