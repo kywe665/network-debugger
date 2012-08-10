@@ -121,7 +121,12 @@
           }
           if (Array.isArray(resp.errors)) {
             resp.errors.forEach(function (error) {
-              options.body += error.message;
+              if (typeof error.message === 'string') {
+                options.body += error.message;
+              }
+              else {
+                options.body += error.message.message || error.message.code;
+              }
             });
           }
           if (!options.body) {
@@ -256,7 +261,7 @@
       , port = $(this).parent().find('a').html()
       ;
 
-    closeListener(protocol, port)
+    closeListener(protocol, port);
     tabs.closeTab(protocol, port, this);
   });
   $('.container').on('.js-ui-tab-view:not(.css-active) .js-portNum', 'keypress', function (e) {
