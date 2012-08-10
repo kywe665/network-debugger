@@ -49,7 +49,7 @@
       listenerControl[protocol].assignSocket(centralEmitter);
     });
 
-    websocketServer = socket.listen(3454);
+    websocketServer = socket.listen(0);
     websocketServer.set('log level', 1);
     websocketServer.sockets.on('connection', function (socket) {
       connectedSockets.push(socket);
@@ -82,6 +82,8 @@
     function onPageLoad(request, response){
       var summary = {}
         ;
+
+      summary.socketPort = websocketServer.server.address().port;
 
       Object.keys(listenerControl).forEach(function (protocol) {
         summary[protocol] = listenerControl[protocol].currentStatus();

@@ -291,8 +291,8 @@
   });
 
   //SOCKET COMMUNICATION WITH SERVER
-  function openSocket() {
-    socket = io.connect('http://'+window.location.hostname+':3454');
+  function openSocket(port) {
+    socket = io.connect('http://'+window.location.hostname+':'+port);
 
     socket.on('connect', function () {
       socket.send('hi');
@@ -345,8 +345,12 @@
   function initBuild(resp) {
     var options = {};
 
+    openSocket(resp.result.socketPort);
+    // delete the socket port to make sure it isn't interpretted as a protocol
+    delete resp.result.socketPort;
+
     Object.keys(resp.result).forEach(function (protocol) {
-      if (resp.result[protocol].length > 0) {
+      if (Array.isArray(resp.result[protocol]) && resp.result[protocol].length > 0) {
         resp.result[protocol].forEach(function (listener) {
           tabs.makeNew(protocol, listener.portNum);
           options.body = protocol.toUpperCase() + ' listener open on port '+ listener.portNum;
@@ -358,8 +362,6 @@
         });
       }
     });
-
-    openSocket();
   }
 
   $(document).ready(function () {
