@@ -193,7 +193,7 @@
     reqwest({
       url: 'http://'+window.location.host+'/listeners/' + options.protocol + '/' + options.port
     , type: 'json'
-    , method: 'del'
+    , method: 'delete'
     , error: function (err) {
         console.error('Server Error: ', err);
         options.body = 'Cannot communicate with netbug server';
@@ -240,17 +240,18 @@
       return;
     }
     openListener(protocol, port);
-	});
+  });
   $('.container').on('.js-ui-tab-view:not(.css-active) .js-reopen', 'click', function () {
     openListener($(this).attr('data-protocol'), $(this).attr('data-port'), true);
-	});
+  });
   $('.container').on('.js-ui-tab-view .js-close-tab', 'click', function () {
    var protocol = $(this).parent().attr('data-protocol')
       , port = $(this).parent().find('a').html()
       ;
-    socket.emit('kill' + protocol, port);
-    tabs.closeTab(port, this);
-	});
+
+    closeListener(protocol, port)
+    tabs.closeTab(protocol, port, this);
+  });
   $('.container').on('.js-ui-tab-view:not(.css-active) .js-portNum', 'keypress', function (e) {
     if (e.keyCode === 13) {
       $('.js-openSocket.js-'+$(this).attr('data-protocol')).trigger('click');
@@ -263,29 +264,18 @@
     $(this).closest('.js-ui-tab-view').find('.js-'+$(this).attr('data-protocol')+'-stream').html('');
   });
   $('.container').on('.js-ui-tab-view:not(.css-inactive) .js-log', 'click', function () {
-    if ($(this).attr('data-protocol') === 'http') {
-      var port = $(this).closest('.js-ui-tab-view').attr('data-name');
-      socket.emit('log' + $(this).attr('data-protocol'), port);
-      $(this).toggleClass('activeLog');
-    }
-    else {
-      socket.emit('log' + $(this).attr('data-protocol'));
-      $(this).toggleClass('activeLog');
-    }
+    var protocol = $(this).attr('data-protocol')
+      , port = $(this).closest('.js-ui-tab-view').attr('data-name')
+      ;
+
+    setListenerLogging(protocol, port, {logData: true, separateFiles: true});
   });
   $('.container').on('.js-ui-tab-view:not(.css-inactive) .js-closeSocket', 'click', function () {
     var protocol = $(this).attr('data-protocol')
       , port = $(this).closest('.js-ui-tab-view').attr('data-name')
       ;
 
-    $('.js-log.activeLog.js-' + port).trigger('click');
-
     closeListener(protocol, port);
-  });
-
-  //EVENT LISTENERS HTTP
-  $('.container').on('.js-include-headers', 'change', function () {
-    socket.emit('includeHeaders', $('.js-include-headers').attr('checked'));
   });
 
   //SOCKET COMMUNICATION WITH SERVER
@@ -296,7 +286,7 @@
       socket.send('hi');
 
       socket.on('listenerCreated', function (msg) {
-        console.log('TODO: implement listenerCreated:', msg.protocol, msg.port, msg.logSettings);
+        console.log('TODO: implement listenerCreated:', msg);
       });
 
       socket.on('listenerData', function (msg) {
@@ -304,12 +294,12 @@
       });
 
       socket.on('connectionChange', function (msg) {
-        console.log('TODO: implement connectionChange:', msg.protocol, msg.port, msg.count);
+        console.log('TODO: implement connectionChange:', msg);
         //$('.js-tcp-connection-count').html(count);
       });
 
       socket.on('listenerChanged', function (msg) {
-        console.log('TODO: implement listenerChanged:', msg.protocol, msg.port, msg.logSettings);
+        console.log('TODO: implement listenerChanged:', msg);
       });
 
       socket.on('listenerClosed', function (msg) {
