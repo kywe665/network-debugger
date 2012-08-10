@@ -55,17 +55,17 @@
     return data;
   }
 
-  function scrollLock(options, port) {
-    var portName = port || options.protocol
-      , selector = '.js-ui-tab-view[data-name="'+portName+'"]'
+  function scrollLock(protocol, port) {
+    var selector = '.js-ui-tab-view[data-name="'+port+'"]'
       ;
-    if ($(selector +' .js-scroll.js-'+options.protocol).attr('checked') && $(selector +' .js-'+options.protocol+'-stream')[0].scrollHeight !== 0) {
-      $(selector + ' .js-'+options.protocol+'-stream')[0].scrollTop = $(selector +' .js-'+options.protocol+'-stream')[0].scrollHeight;
+
+    if ($(selector +' .js-scroll.js-'+protocol).attr('checked') && $(selector +' .js-'+protocol+'-stream')[0].scrollHeight !== 0) {
+      $(selector + ' .js-'+protocol+'-stream')[0].scrollTop = $(selector +' .js-'+protocol+'-stream')[0].scrollHeight;
     }
-    if ($(selector +' .js-'+options.protocol+'-stream').children().length > 9) {
+    if ($(selector +' .js-'+protocol+'-stream').children().length > 9) {
       //console.log('cleared space: '+portName);
-      $(selector +' .js-'+options.protocol+'-stream span').first().remove();
-      $(selector +' .js-'+options.protocol+'-stream span').first().remove();
+      $(selector +' .js-'+protocol+'-stream span').first().remove();
+      $(selector +' .js-'+protocol+'-stream span').first().remove();
     }
   }
 
@@ -75,14 +75,14 @@
     data = processBody(options, data);
 
     pure.injectCode(options, data);
-    scrollLock(options, options.port);
+    scrollLock(options.protocol, options.port);
     visual.highlightMsg(options);
   }
 
   function injectMessage(options, port) {
     options.port = port;
     pure.injectMessage(options);
-    scrollLock(options, port);
+    scrollLock(options.protocol, port);
   }
 
   function openListener(protocol, port, reopen) {
@@ -257,9 +257,7 @@
     }
   });
   $('.container').on('.js-scroll', 'change', function () {
-    scrollLock({
-      protocol: $(this).attr('data-protocol')
-    }, $(this).closest('.js-ui-tab-view').attr('data-name'));
+    scrollLock($(this).attr('data-protocol'), $(this).closest('.js-ui-tab-view').attr('data-name'));
   });
   $('.container').on('.js-clear', 'click', function () {
     $(this).closest('.js-ui-tab-view').find('.js-'+$(this).attr('data-protocol')+'-stream').html('');
