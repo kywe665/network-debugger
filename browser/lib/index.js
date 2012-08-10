@@ -104,7 +104,7 @@
         injectMessage(options, 'default');
       }
     , success: function (resp) {
-        if (!resp.error && resp.result && !resp.result.error) {
+        if (!resp.error && (!resp.result || !resp.result.error)) {
           port = resp.result.portNum;
           if (!reopen) {
             tabs.makeNew(protocol, port);
@@ -158,7 +158,7 @@
     , success: function (resp) {
         // If there wasn't an error, we will get the event listenerChanged,
         // which should trigger anything we would want to do on success
-        if (!resp.error && resp.result && !resp.result.error) {
+        if (!resp.error && (!resp.result || !resp.result.error)) {
           return;
         }
 
@@ -204,7 +204,7 @@
     , success: function (resp) {
         // If there wasn't an error, we will get the event listenerClosed,
         // which should trigger anything we would want to do on success
-        if (!resp.error && resp.result && !resp.result.error) {
+        if (!resp.error && (!resp.result || !resp.result.error)) {
           return;
         }
 
@@ -294,7 +294,7 @@
       });
 
       socket.on('connectionChange', function (msg) {
-        console.log('TODO: implement connectionChange:', msg);
+        //console.log('TODO: implement connectionChange:', msg);
         //$('.js-tcp-connection-count').html(count);
       });
 
@@ -370,11 +370,14 @@
         injectMessage(options, 'default');
       }
     , success: function (resp) {
-        if (!resp.error) {
+        if (!resp.error && resp.result && !resp.result.error) {
           initBuild(resp);
         }
         else {
           options.cssClass = 'css-streamError';
+          if (resp.hasOwnProperty('result') && resp.result.hasOwnProperty('error')) {
+            options.body += resp.result.error;
+          }
           if (Array.isArray(resp.errors)) {
             resp.errors.forEach(function (error) {
               options.body += error.message;
