@@ -171,6 +171,12 @@
         response.json();
         return;
       }
+      if (!request.body || 'object' !== typeof request.body) {
+        console.error('Cannot set log settings for', request.params.protocol+':'+request.params.portNum, 'with', request.body);
+        response.error('Must send a JSON object in the body');
+        response.json();
+        return;
+      }
 
       retVal = manager.changeLogSettings(request.params.portNum, request.body);
       response.json(retVal);
