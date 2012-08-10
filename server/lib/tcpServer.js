@@ -112,7 +112,7 @@
     }
 
     server.on('error', callbackWrapper);
-    server.on('connections', handleConnection);
+    server.on('connection', handleConnection);
 
     server.on('close', function () {
       if (finishedData.length > 0) {
