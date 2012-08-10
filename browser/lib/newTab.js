@@ -9,31 +9,33 @@
     , location = window.location
     ;
 
-  function makeNew(protocol, port){
+  function makeNew(protocol, port) {
     pure.injectNewTab({
       "class": ' js-'+port,
       "protocol": protocol,
       "tabLink": '/' + protocol +'/'+port,
       "portNum": port
     });
+
     notPure.injectTabView(port, protocol, 'js-'+protocol);
-    changeToCurrent(port, protocol);
+    changeToCurrent(protocol, port);
   }
 
-  function changeToCurrent(portNum, protocol){
-    window.location.hash = '/'+protocol+'/'+portNum;
+  function changeToCurrent(protocol, port) {
+    window.location.hash = '/'+protocol+'/'+port;
     $('.js-default').removeClass('css-hidden');
     $('.js-tab-container').css('margin-bottom', '20px');
   }
 
-  function closeTab(port, that) {
+  function closeTab(protocol, port, that) {
     $('.js-log.activeLog.js-'+port).trigger('click');
     $(that).closest('.js-tab-template').remove();
     $('.js-ui-tab-view[data-name="'+port+'"]').remove();
-    changeToCurrent('default', 'http');
-    if($('.js-ui-tab-view[data-name="http"] .js-tab-bar').children().length <= 1){
-      $('.js-ui-tab-view[data-name="http"] .js-tab-bar .js-default').addClass('css-hidden');
-      $('.js-ui-tab-view[data-name="http"] .js-tab-container').css('margin-bottom', '0px');
+    changeToCurrent(protocol, 'default');
+
+    if ($('.js-ui-tab-view[data-name="' + protocol + '"] .js-tab-bar').children().length <= 1){
+      $('.js-ui-tab-view[data-name="' + protocol + '"] .js-tab-bar .js-default').addClass('css-hidden');
+      $('.js-ui-tab-view[data-name="' + protocol + '"] .js-tab-container').css('margin-bottom', '0px');
     }
   }
 

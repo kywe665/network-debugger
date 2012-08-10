@@ -80,10 +80,8 @@
   }
 
   function injectMessage(options, port) {
-    pure.injectMessage(options.protocol, {
-      'message': options.body,
-      'class': options.cssClass
-    }, port);
+    options.port = port;
+    pure.injectMessage(options);
     scrollLock(options, port);
   }
 
@@ -103,7 +101,7 @@
         console.error('Server Error: ', err);
         options.body = 'Cannot communicate with netbug server';
         options.cssClass = 'css-streamError';
-        injectMessage(options);
+        injectMessage(options, 'default');
       }
     , success: function (resp) {
         if (!resp.error && resp.result && !resp.result.error) {
@@ -335,7 +333,7 @@
         options.cssClass = 'css-streamError';
         options.body = 'NetBug Server Down';
         options.protocol = 'all';
-        injectMessage(options);
+        injectMessage(options, 'default');
         options.active = false;
         $('.js-log.activeLog').trigger('click');
         visual.stateChange('all');
@@ -379,7 +377,7 @@
         console.error('Server Error: ', err);
         options.body = 'Cannot communicate with netbug server';
         options.cssClass = 'css-streamError';
-        injectMessage(options);
+        injectMessage(options, 'default');
       }
     , success: function (resp) {
         if (!resp.error) {
@@ -395,7 +393,7 @@
           if (!options.body) {
             options.body = 'Unknown error on page load';
           }
-          injectMessage(options);
+          injectMessage(options, 'default');
         }
       }
     });

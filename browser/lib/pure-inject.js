@@ -15,9 +15,10 @@
     , tabContainerDir
     , tabContainerTemplate
     ;
+
   messageDir = {
-    'span': 'message',
-    '@class': 'class'
+    'span': 'body',
+    '@class': 'cssClass'
   };
   codeDir = {
     'span': 'code',
@@ -53,13 +54,22 @@
   tabTemplate = pure('.js-tab-template').compile(tabDir);
   //tabContainerTemplate = pure('.js-tab-container-template').compile(tabContainerDir);
 
-  function injectMessage(protocol, data, port) {
-    if(port){
-      $('.js-ui-tab-view[data-name="'+port+'"] .js-'+protocol+'-stream').append(addTime() + messageTemplate(data));
+  function injectMessage(options, data) {
+
+    var stream;
+
+    if (!options.hasOwnProperty('protocol')) {
+      console.error('received code injection request without protocol');
+      return;
     }
-    else{
-      $('.js-'+protocol+'-stream').append(addTime() + messageTemplate(data));
+    if (!options.hasOwnProperty('port')) {
+      console.error('received code injection request without port');
+      return;
     }
+    data = data || options;
+
+    stream = $('.js-ui-tab-view[data-name="'+options.port+'"] .js-'+options.protocol+'-stream');
+    stream.append(addTime() + messageTemplate(data));
   }
 
   function injectCode(options, data) {
