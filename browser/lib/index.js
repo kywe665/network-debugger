@@ -234,9 +234,16 @@
   });
   $('.container').on('.js-ui-tab-view:not(.css-active) .js-openSocket', 'click', function () {
     var protocol = $(this).attr('data-protocol')
-      , port = $('.js-portNum.js-'+protocol).val()
+      , port = Number($('.js-portNum.js-'+protocol).val())
+      , options
       ;
-    if (!port) {
+
+    if (isNaN(port) || port < 0 || port > 65535) {
+      options = {};
+      options.protocol = protocol;
+      options.cssClass = 'css-streamError';
+      options.body = 'Specified port must be a number between 0 and 65535';
+      injectMessage(options, 'default');
       return;
     }
     openListener(protocol, port);
