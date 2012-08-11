@@ -9,7 +9,7 @@
     , location = window.location
     ;
 
-  function makeNew(protocol, port) {
+  function makeNew(protocol, port, logSettings) {
     pure.injectNewTab({
       "class": ' js-'+port,
       "protocol": protocol,
@@ -17,7 +17,7 @@
       "portNum": port
     });
 
-    notPure.injectTabView(port, protocol, 'js-'+protocol);
+    notPure.injectTabView(protocol, port, logSettings);
 
     // now that we have atleast one tab open display the default tab as visible
     $('.js-ui-tab-view[data-name="' + protocol + '"] .js-default').removeClass('css-hidden');

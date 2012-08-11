@@ -107,7 +107,7 @@
         if (!resp.error && (!resp.result || !resp.result.error)) {
           port = resp.result.portNum;
           if (!reopen) {
-            tabs.makeNew(protocol, port);
+            tabs.makeNew(protocol, port, resp.result.logSettings);
           }
           options.active = true;
           visual.stateChange(protocol, port, true);
@@ -152,7 +152,8 @@
       url: 'http://'+window.location.host+'/listeners/'+protocol+'/'+port
     , type: 'json'
     , method: 'put'
-    , body: settings
+    , contentType: 'application/json'
+    , data: JSON.stringify(settings)
     , error: function (err) {
         console.error('Server Error: ', err);
         options.body = 'Cannot communicate with netbug server';
@@ -278,9 +279,26 @@
   $('.container').on('.js-ui-tab-view:not(.css-inactive) .js-log', 'click', function () {
     var protocol = $(this).attr('data-protocol')
       , port = $(this).closest('.js-ui-tab-view').attr('data-name')
+      , curState = $(this).hasClass('activeLog')
       ;
 
-    setListenerLogging(protocol, port, {logData: true, separateFiles: true});
+    setListenerLogging(protocol, port, {logData: !curState});
+  });
+  $('.container').on('.js-ui-tab-view:not(.css-inactive) .js-separate-files', 'click', function () {
+    var protocol = $(this).attr('data-protocol')
+      , port = $(this).closest('.js-ui-tab-view').attr('data-name')
+      , curState = $(this).attr('checked')
+      ;
+
+    setListenerLogging(protocol, port, {separateFiles: !curState});
+  });
+  $('.container').on('.js-ui-tab-view:not(.css-inactive) .js-include-headers', 'click', function () {
+    var protocol = $(this).attr('data-protocol')
+      , port = $(this).closest('.js-ui-tab-view').attr('data-name')
+      , curState = $(this).attr('checked')
+      ;
+
+    setListenerLogging(protocol, port, {includeHeaders: !curState});
   });
   $('.container').on('.js-ui-tab-view:not(.css-inactive) .js-closeSocket', 'click', function () {
     var protocol = $(this).attr('data-protocol')
@@ -352,7 +370,7 @@
     Object.keys(resp.result).forEach(function (protocol) {
       if (Array.isArray(resp.result[protocol]) && resp.result[protocol].length > 0) {
         resp.result[protocol].forEach(function (listener) {
-          tabs.makeNew(protocol, listener.portNum);
+          tabs.makeNew(protocol, listener.portNum, listener.logSettings);
           options.body = protocol.toUpperCase() + ' listener open on port '+ listener.portNum;
           options.cssClass = 'css-streamNewConnection';
           options.protocol = protocol;

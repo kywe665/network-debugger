@@ -125,7 +125,7 @@
         });
 
         if (logSettings.logData) {
-          if (logSettings.includeHeader) {
+          if (logSettings.includeHeaders) {
             loggableData = headers + body;
           }
           else {
