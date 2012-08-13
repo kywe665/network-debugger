@@ -28,7 +28,6 @@
   }
 
   function closeTab(protocol, port, that) {
-    $('.js-log.activeLog.js-'+port).trigger('click');
     $(that).closest('.js-tab-template').remove();
     $('.js-ui-tab-view[data-name="'+port+'"]').remove();
 

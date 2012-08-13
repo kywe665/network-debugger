@@ -361,8 +361,6 @@
 
         $('.js-ui-tab-view[data-name="' + msg.protocol + '"] .js-ui-tab-view[data-name="' + msg.port + '"] .js-separate-files').attr('checked', msg.logSettings.separateFiles);
         $('.js-ui-tab-view[data-name="' + msg.protocol + '"] .js-ui-tab-view[data-name="' + msg.port + '"] .js-include-headers').attr('checked', msg.logSettings.includeHeaders);
-
-        console.log('listenerChanged', msg);
       });
 
       socket.on('listenerClosed', function (msg) {
@@ -386,7 +384,6 @@
         options.protocol = 'all';
         injectMessage(options, 'default');
         options.active = false;
-        $('.js-log.activeLog').trigger('click');
         visual.stateChange('all');
       });
 
