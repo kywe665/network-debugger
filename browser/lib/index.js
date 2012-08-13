@@ -85,7 +85,7 @@
     scrollLock(options.protocol, port);
   }
 
-  function openListener(protocol, port, reopen) {
+  function openListener(protocol, port) {
     var options = {}
       ;
 
@@ -104,34 +104,28 @@
         injectMessage(options, 'default');
       }
     , success: function (resp) {
+        // If there wasn't an error, we will get the event listenerCreated,
+        // which should trigger anything we would want to do on success
         if (!resp.error && (!resp.result || !resp.result.error)) {
-          port = resp.result.portNum;
-          if (!reopen) {
-            tabs.makeNew(protocol, port, resp.result.logSettings);
-          }
-          options.active = true;
-          visual.stateChange(protocol, port, true);
-          options.body += protocol.toUpperCase() + ' listener succesfully opened on port '+ port;
-          options.cssClass = 'css-streamNewConnection';
+          return;
         }
-        else {
-          options.cssClass = 'css-streamError';
-          if (resp.hasOwnProperty('result') && resp.result.hasOwnProperty('error')) {
-            options.body += resp.result.error;
-          }
-          if (Array.isArray(resp.errors)) {
-            resp.errors.forEach(function (error) {
-              if (typeof error.message === 'string') {
-                options.body += error.message;
-              }
-              else {
-                options.body += error.message.message || error.message.code;
-              }
-            });
-          }
-          if (!options.body) {
-            options.body = 'Unknown error opening linstener';
-          }
+
+        options.cssClass = 'css-streamError';
+        if (resp.hasOwnProperty('result') && resp.result.hasOwnProperty('error')) {
+          options.body += resp.result.error;
+        }
+        if (Array.isArray(resp.errors)) {
+          resp.errors.forEach(function (error) {
+            if (typeof error.message === 'string') {
+              options.body += error.message;
+            }
+            else {
+              options.body += error.message.message || error.message.code;
+            }
+          });
+        }
+        if (!options.body) {
+          options.body = 'Unknown error opening linstener';
         }
 
         injectMessage(options, 'default');
@@ -255,7 +249,7 @@
     openListener(protocol, port);
   });
   $('.container').on('.js-ui-tab-view:not(.css-active) .js-reopen', 'click', function () {
-    openListener($(this).attr('data-protocol'), $(this).attr('data-port'), true);
+    openListener($(this).attr('data-protocol'), $(this).attr('data-port'));
   });
   $('.container').on('.js-ui-tab-view .js-close-tab', 'click', function () {
    var protocol = $(this).parent().attr('data-protocol')
@@ -318,7 +312,34 @@
       socket.send('hi');
 
       socket.on('listenerCreated', function (msg) {
-        console.log('TODO: implement listenerCreated:', msg);
+        var options = {}
+          , reopen
+          ;
+
+        reopen = $('.js-ui-tab-view[data-name="' + msg.protocol + '"]').find('.js-ui-tab-view[data-name="' + msg.port + '"]').length > 0;
+        if (!reopen) {
+          tabs.makeNew(msg.protocol, msg.port, msg.logSettings);
+        }
+
+        if (msg.logSettings.logData) {
+          $('.js-ui-tab-view[data-name="' + msg.protocol + '"] .js-ui-tab-view[data-name="' + msg.port + '"] .js-log').addClass('activeLog');
+        }
+        else {
+          $('.js-ui-tab-view[data-name="' + msg.protocol + '"] .js-ui-tab-view[data-name="' + msg.port + '"] .js-log').removeClass('activeLog');
+        }
+
+        $('.js-ui-tab-view[data-name="' + msg.protocol + '"] .js-ui-tab-view[data-name="' + msg.port + '"] .js-separate-files').attr('checked', msg.logSettings.separateFiles);
+        $('.js-ui-tab-view[data-name="' + msg.protocol + '"] .js-ui-tab-view[data-name="' + msg.port + '"] .js-include-headers').attr('checked', msg.logSettings.includeHeaders);
+
+        visual.stateChange(msg.protocol, msg.port, true);
+
+        options.active = true;
+        options.cssClass = 'css-streamNewConnection';
+        options.protocol = msg.protocol;
+        options.body = msg.protocol.toUpperCase() + ' listener opened on port ' + msg.port;
+
+        injectMessage(options, 'default');
+        injectMessage(options, msg.port);
       });
 
       socket.on('listenerData', function (msg) {
@@ -383,6 +404,15 @@
       if (Array.isArray(resp.result[protocol]) && resp.result[protocol].length > 0) {
         resp.result[protocol].forEach(function (listener) {
           tabs.makeNew(protocol, listener.portNum, listener.logSettings);
+          if (listener.logSettings.logData) {
+            $('.js-ui-tab-view[data-name="' + protocol + '"] .js-ui-tab-view[data-name="' + listener.portNum + '"] .js-log').addClass('activeLog');
+          }
+          else {
+            $('.js-ui-tab-view[data-name="' + protocol + '"] .js-ui-tab-view[data-name="' + listener.portNum + '"] .js-log').removeClass('activeLog');
+          }
+          $('.js-ui-tab-view[data-name="' + protocol + '"] .js-ui-tab-view[data-name="' + listener.portNum + '"] .js-separate-files').attr('checked', listener.logSettings.separateFiles);
+          $('.js-ui-tab-view[data-name="' + protocol + '"] .js-ui-tab-view[data-name="' + listener.portNum + '"] .js-include-headers').attr('checked', listener.logSettings.includeHeaders);
+
           options.body = protocol.toUpperCase() + ' listener open on port '+ listener.portNum;
           options.cssClass = 'css-streamNewConnection';
           options.protocol = protocol;
