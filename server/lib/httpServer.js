@@ -132,7 +132,7 @@
             loggableData = body;
           }
 
-          if (logSettings.separateFile) {
+          if (logSettings.separateFiles) {
             file.writeData(logSettings.logPath, loggableData);
           }
           else {
