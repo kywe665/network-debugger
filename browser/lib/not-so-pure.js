@@ -25,7 +25,7 @@
     template +=     '<div class="css-top right">';
     template +=       '<p>Save each packet separately</p>';
     template +=       '<input data-protocol="'+protocol+'" type="checkbox" checked="'+logSettings.separateFiles+'" class="js-separate-files">';
-    template +=       '<a data-protocol="'+protocol+'" class="css-button js-log css-log js-'+protocol+ (logSettings.logData ? 'activeLog' : '') +'"></a>';
+    template +=       '<a data-protocol="'+protocol+'" class="css-button js-log css-log js-'+protocol+ (logSettings.logData ? ' activeLog' : '') +'"></a>';
     template +=     '</div>';
     template +=     '<div class="js-'+protocol+'-stream js-all-stream css-stream">';
     template +=       '<span class="js-allstream-error"></span>';

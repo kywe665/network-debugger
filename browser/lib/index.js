@@ -290,7 +290,8 @@
       , curState = $(this).attr('checked')
       ;
 
-    setListenerLogging(protocol, port, {separateFiles: !curState});
+    // for the check boxes the state changes to was the user wants before we get the event
+    setListenerLogging(protocol, port, {separateFiles: curState});
   });
   $('.container').on('.js-ui-tab-view:not(.css-inactive) .js-include-headers', 'click', function () {
     var protocol = $(this).attr('data-protocol')
@@ -298,7 +299,8 @@
       , curState = $(this).attr('checked')
       ;
 
-    setListenerLogging(protocol, port, {includeHeaders: !curState});
+    // for the check boxes the state changes to was the user wants before we get the event
+    setListenerLogging(protocol, port, {includeHeaders: curState});
   });
   $('.container').on('.js-ui-tab-view:not(.css-inactive) .js-closeSocket', 'click', function () {
     var protocol = $(this).attr('data-protocol')
@@ -323,13 +325,23 @@
         preInjectCode(msg);
       });
 
-      socket.on('connectionChange', function (msg) {
+      //socket.on('connectionChange', function (msg) {
         //console.log('TODO: implement connectionChange:', msg);
         //$('.js-tcp-connection-count').html(count);
-      });
+      //});
 
       socket.on('listenerChanged', function (msg) {
-        console.log('TODO: implement listenerChanged:', msg);
+        if (msg.logSettings.logData) {
+          $('.js-ui-tab-view[data-name="' + msg.protocol + '"] .js-ui-tab-view[data-name="' + msg.port + '"] .js-log').addClass('activeLog');
+        }
+        else {
+          $('.js-ui-tab-view[data-name="' + msg.protocol + '"] .js-ui-tab-view[data-name="' + msg.port + '"] .js-log').removeClass('activeLog');
+        }
+
+        $('.js-ui-tab-view[data-name="' + msg.protocol + '"] .js-ui-tab-view[data-name="' + msg.port + '"] .js-separate-files').attr('checked', msg.logSettings.separateFiles);
+        $('.js-ui-tab-view[data-name="' + msg.protocol + '"] .js-ui-tab-view[data-name="' + msg.port + '"] .js-include-headers').attr('checked', msg.logSettings.includeHeaders);
+
+        console.log('listenerChanged', msg);
       });
 
       socket.on('listenerClosed', function (msg) {
