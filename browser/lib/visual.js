@@ -14,18 +14,17 @@
     else if(open){
       $('.js-ui-tab-view[data-name="'+protocol+'"]').addClass('css-active');
       $('.js-ui-tab-view[data-name="'+protocol+'"]').removeClass('css-inactive');
-      $('.js-ui-tab-view[data-name="'+port+'"]').addClass('css-active');
-      $('.js-ui-tab-view[data-name="'+port+'"]').removeClass('css-inactive');
+      $('.js-ui-tab-view[data-name="'+protocol+'"] .js-ui-tab-view[data-name="'+port+'"]').addClass('css-active');
+      $('.js-ui-tab-view[data-name="'+protocol+'"] .js-ui-tab-view[data-name="'+port+'"]').removeClass('css-inactive');
     }
-    else if($('.js-ui-tab-view[data-name="'+protocol+'"] .js-tab-bar').children().length <= 1){
-      $('.js-ui-tab-view[data-name="'+protocol+'"]').removeClass('css-active');
-      $('.js-ui-tab-view[data-name="'+protocol+'"]').addClass('css-inactive');
-      $('.js-ui-tab-view[data-name="'+port+'"]').removeClass('css-active');
-      $('.js-ui-tab-view[data-name="'+port+'"]').addClass('css-inactive');
-    }
-    else{
-      $('.js-ui-tab-view[data-name="'+port+'"]').removeClass('css-active');
-      $('.js-ui-tab-view[data-name="'+port+'"]').addClass('css-inactive');
+    else {
+      $('.js-ui-tab-view[data-name="'+protocol+'"] .js-ui-tab-view[data-name="'+port+'"]').removeClass('css-active');
+      $('.js-ui-tab-view[data-name="'+protocol+'"] .js-ui-tab-view[data-name="'+port+'"]').addClass('css-inactive');
+
+      if($('.js-ui-tab-view[data-name="'+protocol+'"] .js-tab-bar').children().length <= 1) {
+        $('.js-ui-tab-view[data-name="'+protocol+'"]').removeClass('css-active');
+        $('.js-ui-tab-view[data-name="'+protocol+'"]').addClass('css-inactive');
+      }
     }
   }
 

@@ -6,7 +6,6 @@
     , pure = require('./pure-inject')
     , notPure = require('./not-so-pure')
     , window = require('window')
-    , location = window.location
     ;
 
   function makeNew(protocol, port, logSettings) {

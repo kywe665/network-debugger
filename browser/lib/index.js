@@ -254,9 +254,14 @@
   $('.container').on('.js-ui-tab-view .js-close-tab', 'click', function () {
    var protocol = $(this).parent().attr('data-protocol')
       , port = $(this).parent().find('a').html()
+      , listenerOpen
       ;
 
-    closeListener(protocol, port);
+    listenerOpen = $('.js-ui-tab-view[data-name="'+protocol+'"] .js-ui-tab-view[data-name="'+port+'"]').hasClass('css-active');
+    if (listenerOpen) {
+      closeListener(protocol, port);
+    }
+
     tabs.closeTab(protocol, port, this);
   });
   $('.container').on('.js-ui-tab-view:not(.css-active) .js-portNum', 'keypress', function (e) {
