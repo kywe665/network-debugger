@@ -101,7 +101,7 @@
 
       logSettings.logPath = path.resolve(logPath, 'udp', port.toString());
       logSettings.logData = false;
-      logSettings.separateFiles = false;
+      logSettings.separateFiles = true;
 
       // seal logSettings so nothing will be deleted or added (prevent stupid typos)
       Object.seal(logSettings);
@@ -128,10 +128,17 @@
 
   // Change whether or not we should log, and it we should log packets separately
   function changeLogSettings(port, newSettings) {
-    var logSettings = listeners[port].logSettings
-      , finishedData = listeners[port].finishedData
+    var logSettings
+      , finishedData
       , unusedKeys = []
       ;
+
+    if (!listeners[port]) {
+      return {error: 'No UDP listener on port ' + port};
+    }
+
+    logSettings = listeners[port].logSettings;
+    finishedData = listeners[port].finishedData;
 
     Object.keys(newSettings).forEach(function (key) {
       if (logSettings.hasOwnProperty(key) && key !== 'logPath') {
