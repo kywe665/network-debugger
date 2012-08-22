@@ -6,111 +6,223 @@
   "use strict";
 
   var connect = require('steve')
-    , app = connect.createServer()
-    , tcpServer = require('./tcpServer')
-    , httpServer = require('./httpServer')
-    , udpServer = require('./udpServer')
-    , file = require('./file')
-    , util = require('util')
-    , browserSocket
-    , Socket = require('socket.io')
-    , io = Socket.listen(3454)
+    , socket = require('socket.io')
+    , listenerControl = {
+          http: require('./httpServer')
+        , tcp:  require('./tcpServer')
+        , udp:  require('./udpServer')
+      }
+    , initialized = false
     ;
 
   connect.router = require('connect_router');
 
-  io.set('log level', 1);
+  function init(logPath) {
+    var app
+      , centralEmitter = {}
+      , websocketServer
+      , connectedSockets = []
+      ;
 
-  function create (logpath) {
-    openSockets();
-    //function when a GET request is sent to /listenUDP
-    function listenUdp(request, response) {
-      udpServer.startListening(request, response);
+    if (initialized) {
+      throw new Error('Tried to call init more than once');
     }
+    initialized = true;
 
-    //function when a GET request is sent to /listenHTTP
-    function listenHttp(request, response) {
-      httpServer.startListening(request, response);
-    }
+    centralEmitter.emit = function () {
+      var args = arguments
+        ;
 
-    //function when a GET request is sent to /listenTCP
-    function listenTcp(request, response) {
-      tcpServer.startListening(request, response);
-    }
+      connectedSockets.forEach(function (socket) {
+        socket.emit.apply(socket, args);
+      });
+    };
+    centralEmitter.send = function () {
+      var args = arguments
+        ;
+
+      connectedSockets.forEach(function (socket) {
+        socket.send.apply(socket, args);
+      });
+    };
+    Object.keys(listenerControl).forEach(function (protocol) {
+      listenerControl[protocol].assignSocket(centralEmitter);
+    });
+
+    websocketServer = socket.listen(0);
+    websocketServer.set('log level', 1);
+    websocketServer.sockets.on('connection', function (socket) {
+      connectedSockets.push(socket);
+
+      console.log('Browser socket connected (count = ' + connectedSockets.length + ')');
+      socket.on('disconnect', function () {
+        var index = connectedSockets.indexOf(socket)
+          ;
+        if (index >= 0) {
+          connectedSockets.splice(index, 1);
+          console.log('Browser socket disconnected (count = ' + connectedSockets.length + ')');
+        }
+        else {
+          console.error('Received disconnect event from unlisted browser socket');
+        }
+      });
+      socket.on('close', function () {
+        var index = connectedSockets.indexOf(socket)
+          ;
+        if (index >= 0) {
+          connectedSockets.splice(index, 1);
+          console.log('Browser socket closed (count = ' + connectedSockets.length + ')');
+        }
+        else {
+          console.error('Received close event from unlisted browser socket');
+        }
+      });
+    });
 
     function onPageLoad(request, response){
-      response.json({
-        "http": httpServer.currentStatus()
-      , "tcp": tcpServer.currentStatus()
-      , "udp": udpServer.currentStatus()
+      var summary = {}
+        ;
+
+      summary.socketPort = websocketServer.server.address().port;
+
+      Object.keys(listenerControl).forEach(function (protocol) {
+        summary[protocol] = listenerControl[protocol].currentStatus();
       });
-      response.end();
+
+      response.json(summary);
     }
-    
-    //Browser Comm Sockets
-    function openSockets() {
-      io.sockets.on('connection', function (socket) {
-        browserSocket = socket;
-        console.log('Connected to browser');
-        udpServer.assignSocket(socket);
-        tcpServer.assignSocket(socket);
-        httpServer.assignSocket(socket);
-        socket.on('message', function (data) {
-        });
-        socket.on('disconnect', function () { 
-          console.log('Browser disconnected');
-        });
-        socket.on('killtcp', function (port) {
-          tcpServer.closeAllSockets();
-        });
-        socket.on('killhttp', function (port) {
-          httpServer.close(port);
-        });
-        socket.on('killudp', function (port) {
-          udpServer.close();
-        });
-        socket.on('writeFile', function (protocol, port, id) { 
-          if (protocol === 'tcp'){
-            tcpServer.writeFile(logpath, id);
-          }
-          else if (protocol === 'http'){
-            httpServer.writeFile(logpath, port);
-          }
-          else if (protocol === 'udp'){
-            udpServer.writeFile(logpath);
-          }
-        });
-        socket.on('close', function () { 
-          console.log('ClOsEd Socket');
-        });
-        socket.on('includeHeaders', function (bool) { 
-          httpServer.headers(bool);
-        });
-        socket.on('logtcp', function(port) {
-          tcpServer.toggleLog(logpath);
-        });
-        socket.on('loghttp', function(port) {
-          httpServer.toggleLog(logpath, port);
-        });
-        socket.on('logudp', function(port) {
-          udpServer.toggleLog(logpath);
-        });
+
+    function getListeners(request, response) {
+      var manager = listenerControl[request.params.protocol]
+        , openPorts
+        , foundSpecified
+        ;
+
+      if (!manager) {
+        response.error('Unsupported protocol ' + request.params.protocol);
+        response.json();
+        return;
+      }
+      openPorts = manager.currentStatus();
+
+      if (!request.params.hasOwnProperty('portNum')) {
+        response.json(openPorts);
+        return;
+      }
+      if (isNaN(request.params.portNum)) {
+        response.error('Specified port must be a number');
+        response.json();
+        return;
+      }
+
+      request.params.portNum = Number(request.params.portNum);
+      foundSpecified = openPorts.some(function (listener) {
+        if (listener.portNum === request.params.portNum) {
+          response.json(listener);
+          return true;
+        }
       });
-    } 
+
+      if (!foundSpecified) {
+        response.error('Not listening for ' + request.params.protocol + ' on port ' + request.params.portNum);
+        response.json();
+      }
+    }
+
+    function startListening(request, response) {
+      var manager = listenerControl[request.params.protocol]
+        ;
+
+      if (!manager) {
+        response.error('Unsupported protocol ' + request.params.protocol);
+        return response.json();
+      }
+      if (isNaN(request.params.portNum)) {
+        response.error('Specified port must be a number');
+        response.json();
+        return;
+      }
+
+      function listenerCreated(error, port) {
+        if (error) {
+          response.error(error);
+          response.json();
+          return;
+        }
+
+        request.params.portNum = port;
+        getListeners(request, response);
+      }
+
+      manager.createListener(listenerCreated, request.params.portNum, logPath);
+    }
+
+    function changeSettings(request, response) {
+      var manager = listenerControl[request.params.protocol]
+        , retVal
+        ;
+
+      if (!manager) {
+        response.error('Unsupported protocol ' + request.params.protocol);
+        return response.json();
+      }
+      if (isNaN(request.params.portNum)) {
+        response.error('Specified port must be a number');
+        response.json();
+        return;
+      }
+      if (!request.body || 'object' !== typeof request.body) {
+        console.error('Cannot set log settings for', request.params.protocol+':'+request.params.portNum, 'with', request.body);
+        response.error('Must send a JSON object in the body');
+        response.json();
+        return;
+      }
+
+      retVal = manager.changeLogSettings(request.params.portNum, request.body);
+      response.json(retVal);
+    }
+
+    function stopListening(request, response) {
+      var manager = listenerControl[request.params.protocol]
+        ;
+
+      if (!manager) {
+        response.error('Unsupported protocol ' + request.params.protocol);
+        return response.json();
+      }
+      if (isNaN(request.params.portNum)) {
+        response.error('Specified port must be a number');
+        response.json();
+        return;
+      }
+
+      function listenerDestroyed(error) {
+        if (error) {
+          response.error(error);
+        }
+        response.json();
+      }
+
+      manager.closeListener(listenerDestroyed, request.params.portNum);
+    }
 
     function router(rest) {
-      rest.post('/listentcp/:portNum', listenTcp);
-      rest.post('/listenhttp/:portNum', listenHttp);
-      rest.post('/listenudp/:portNum', listenUdp);
       rest.get('/onPageLoad', onPageLoad);
+      rest.get('/listeners/:protocol', getListeners);
+      rest.get('/listeners/:protocol/:portNum', getListeners);
+      rest.post('/listeners/:protocol/:portNum', startListening);
+      rest.put('/listeners/:protocol/:portNum', changeSettings);
+      rest.del('/listeners/:protocol/:portNum', stopListening);
     }
 
+    app = connect.createServer();
     app.use(connect.favicon());
-    app.use(connect.static(__dirname + '/../../webclient-deployed'));
+    app.use(connect['static'](__dirname + '/../../webclient-deployed'));
     app.use(connect.router(router));
-    
+
     return app;
   }
-    module.exports.create = create;
+
+  module.exports.init = init;
 }());
 

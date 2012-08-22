@@ -6,38 +6,44 @@
     , $ = ender
     ;
 
-  function injectTabView(port, protocol, newClass){
-    var template = 
-      '<div data-name="'+port+'" class="js-ui-tab-view css-ui-tab-view js-all css-inactive">'+
-        '<div class="css-log-options">'+
-          '<input type="checkbox" class="js-include-headers">'+
-          '<p>Save headers</p>'+
-        '</div>'+
-        '<div class="css-connection-info">'+
-          '<a data-protocol="http" data-port="'+port+'" class="css-button css-openSocket js-reopen js-'+port+'">Open Connection</a>'+
-          '<div class="css-connection-status js-http-connection-status off">Connection Status</div>'+
-        '</div>'+
-        '<div class="css-top right">'+
-          '<p>Save each packet seperately</p>'+
-          '<input type="checkbox" checked="true" class="js-http-multifile">'+
-          '<a data-protocol="'+protocol+'" class="css-button js-log css-log '+newClass+'"></a>'+
-        '</div>'+
-        '<div class="js-http-stream js-all-stream css-stream">'+
-          '<span class="js-allstream-error"></span>'+
-        '</div>'+
-        '<div class="css-left css-bottom">'+
-          '<a data-protocol="'+protocol+'" class="css-button css-closeSocket js-closeSocket '+newClass+'">Close Connection</a>'+
-        '</div>'+
-        '<div class="css-center css-bottom">'+
-          '<a data-protocol="'+protocol+'" class="css-button js-clear '+newClass+'">Clear</a>'+
-        '</div>'+
-        '<div class="css-right css-bottom">'+
-          '<p>Lock scroll to bottom</p>'+
-          '<input type="checkbox" checked="true" data-protocol="'+protocol+'" class="js-scroll '+newClass+'">'+
-        '</div>'+
-      '</span>'+
-    '</div>';
-    $('.js-ui-tab-view[data-name='+protocol+'] '+'.js-tab-container').append(template);
+  function injectTabView(protocol, port, logSettings) {
+    var template = '';
+
+    template +=   '<div data-name="'+port+'" class="js-ui-tab-view css-ui-tab-view js-all css-inactive">';
+
+    if (logSettings.hasOwnProperty('includeHeaders')) {
+    template +=     '<div class="css-log-options">';
+    template +=       '<input data-protocol="'+protocol+'" type="checkbox" checked="true" class="js-include-headers">';
+    template +=       '<p>Save headers</p>';
+    template +=     '</div>';
+    }
+
+    template +=     '<div class="css-connection-info">';
+    template +=       '<a data-protocol="'+protocol+'" data-port="'+port+'" class="css-button css-openSocket js-reopen js-'+port+'">Open Connection</a>';
+    template +=       '<div class="css-connection-status js-'+protocol+'-connection-status off">Connection Status</div>';
+    template +=     '</div>';
+    template +=     '<div class="css-top right">';
+    template +=       '<p>Save each packet separately</p>';
+    template +=       '<input data-protocol="'+protocol+'" type="checkbox" checked="true" class="js-separate-files">';
+    template +=       '<a data-protocol="'+protocol+'" class="css-button js-log css-log js-'+protocol+'"></a>';
+    template +=     '</div>';
+    template +=     '<div class="js-'+protocol+'-stream js-all-stream css-stream">';
+    template +=       '<span class="js-allstream-error"></span>';
+    template +=     '</div>';
+    template +=     '<div class="css-left css-bottom">';
+    template +=       '<a data-protocol="'+protocol+'" class="css-button css-closeSocket js-closeSocket js-'+protocol+'">Close Connection</a>';
+    template +=     '</div>';
+    template +=     '<div class="css-center css-bottom">';
+    template +=       '<a data-protocol="'+protocol+'" class="css-button js-clear js-'+protocol+'">Clear</a>';
+    template +=     '</div>';
+    template +=     '<div class="css-right css-bottom">';
+    template +=       '<p>Lock scroll to bottom</p>';
+    template +=       '<input type="checkbox" checked="true" data-protocol="'+protocol+'" class="js-scroll js-'+protocol+'">';
+    template +=     '</div>';
+    template +=   '</span>';
+    template += '</div>';
+
+    $('.js-ui-tab-view[data-name='+protocol+'] .js-tab-container').append(template);
   }
 
   module.exports.injectTabView = injectTabView;

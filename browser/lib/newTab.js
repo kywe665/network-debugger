@@ -6,34 +6,38 @@
     , pure = require('./pure-inject')
     , notPure = require('./not-so-pure')
     , window = require('window')
-    , location = window.location
     ;
 
-  function makeNew(protocol, port){
+  function makeNew(protocol, port, logSettings) {
     pure.injectNewTab({
       "class": ' js-'+port,
       "protocol": protocol,
       "tabLink": '/' + protocol +'/'+port,
       "portNum": port
     });
-    notPure.injectTabView(port, protocol, 'js-'+protocol);
-    changeToCurrent(port, protocol);
+
+    notPure.injectTabView(protocol, port, logSettings);
+
+    // now that we have atleast one tab open display the default tab as visible
+    $('.js-ui-tab-view[data-name="' + protocol + '"] .js-default').removeClass('css-hidden');
+    $('.js-ui-tab-view[data-name="' + protocol + '"] .js-tab-container').css('margin-bottom', '20px');
+
+    // switch to the new tab
+    window.location.hash = '/'+protocol+'/'+port;
   }
-  
-  function changeToCurrent(portNum, protocol){
-    window.location.hash = '/'+protocol+'/'+portNum;
-    $('.js-default').removeClass('css-hidden');
-    $('.js-tab-container').css('margin-bottom', '20px');
-  }
-  
-  function closeTab(port, that) {
-    $('.js-log.activeLog.js-'+port).trigger('click');
+
+  function closeTab(protocol, port, that) {
     $(that).closest('.js-tab-template').remove();
     $('.js-ui-tab-view[data-name="'+port+'"]').remove();
-    changeToCurrent('default', 'http');
-    if($('.js-ui-tab-view[data-name="http"] .js-tab-bar').children().length <= 1){
-      $('.js-ui-tab-view[data-name="http"] .js-tab-bar .js-default').addClass('css-hidden');
-      $('.js-ui-tab-view[data-name="http"] .js-tab-container').css('margin-bottom', '0px');
+
+    // if the tab closed is the one we were on go to the default tab
+    if (window.location.hash === '#/'+protocol+'/'+port) {
+      window.location.hash = '/'+protocol+'/default';
+    }
+
+    if ($('.js-ui-tab-view[data-name="' + protocol + '"] .js-tab-bar').children().length <= 1){
+      $('.js-ui-tab-view[data-name="' + protocol + '"] .js-tab-bar .js-default').addClass('css-hidden');
+      $('.js-ui-tab-view[data-name="' + protocol + '"] .js-tab-container').css('margin-bottom', '0px');
     }
   }
 

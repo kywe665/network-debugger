@@ -22,7 +22,7 @@
         location.hash = '#/' + defaultView;
         return;
       }
-      
+
       urlObj = url.parse(resource.substr(1), true, true);
 
       pathname = urlObj.pathname.substr(1).replace('/', '_');
@@ -75,7 +75,7 @@
       displayTab();
     });
   }
-  
+
   module.exports.create = create;
 }());
 
