@@ -216,6 +216,8 @@
     }
 
     app = connect.createServer();
+    app.use(connect.json());
+    app.use(connect.urlencoded());
     app.use(connect.favicon());
     app.use(connect['static'](__dirname + '/../../webclient-deployed'));
     app.use(connect.router(router));

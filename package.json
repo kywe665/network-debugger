@@ -2,7 +2,7 @@
   "author": "Kyle Weller <kywe665@gmail.com>",
   "name": "netbug",
   "description": "Network Debugger",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "repository": {
     "type": "git",
     "url": "git://github.com/kywe665/network-debugger.git"
