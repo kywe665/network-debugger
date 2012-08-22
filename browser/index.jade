@@ -13,39 +13,28 @@ html(lang='en')
           li.js-ui-tab.js-http(data-protocol='http')
             a(href='/http/default') HTTP
           li.js-ui-tab.js-tcp(data-protocol='tcp')
-            a(href='/tcp') TCP
+            a(href='/tcp/default') TCP
           li.js-ui-tab.js-udp(data-protocol='udp')
-            a(href='/udp') UDP
+            a(href='/udp/default') UDP
       .css-container.container
-        .js-ui-tab-view.css-ui-tab-view.js-all.css-inactive(data-name='tcp')
+        .js-ui-tab-view.js-all.css-inactive(data-name='tcp')
           .css-tab-bar.js-tab-bar
-          p Enter the port to listen on and click 'Listen'
-          .css-listen-form
-            input.js-portNum.js-tcp.css-portNum(type='text')(data-protocol='tcp')
-            a.css-button.css-openSocket.js-openSocket.js-tcp(data-protocol='tcp') Listen
-          .css-connection-info
-            .css-connection-status.js-tcp-connection-status.off Connection Status
-            div Listening to
-              span.css-connection-count.js-tcp-connection-count 0
-              span devices
-          .css-top.right
-            input.js-tcp-multifile(type="checkbox")(checked="true")
-            p Save each packet seperately
-            a.css-button.js-log.css-log.js-tcp(data-protocol='tcp')
-          .js-tcp-stream.js-all-stream.css-stream
-            span.js-allstream-error
-          div.css-left.css-bottom
-            a.css-button.css-closeSocket.js-closeSocket.js-tcp(data-protocol='tcp') Close Connection
-          div.css-center.css-bottom
+            li.js-ui-tab.js-default.css-default.css-hidden(data-protocol="tcp")
+              a(href='/tcp/default')  +
+          .js-ui-tab-view.css-ui-tab-view(data-name='default')
+            p.css-enter-port Enter the port to listen on and click 'Listen'
+            .css-listen-form
+              input.js-portNum.js-tcp.css-portNum(type='text')(data-protocol='tcp')
+              a.css-button.css-openSocket.js-openSocket.js-tcp(data-protocol='tcp') Listen
+            .js-tcp-stream.js-all-stream.css-stream
+              span.js-allstream-error
             a.css-button.js-clear.js-tcp(data-protocol='tcp') Clear
-          div.css-right.css-bottom
-            p Lock scroll to bottom
-            input.js-scroll.js-tcp(type="checkbox")(checked="true")(data-protocol='tcp')
+          .css-tab-container.js-tab-container
 
         .js-ui-tab-view.js-all.css-inactive(data-name='http')
           .css-tab-bar.js-tab-bar
             li.js-ui-tab.js-default.css-default.css-hidden(data-protocol="http")
-              a(href='/http/default')  + 
+              a(href='/http/default')  +
           .js-ui-tab-view.css-ui-tab-view(data-name='default')
             p.css-enter-port Enter the port to listen on and click 'Listen'
             .css-listen-form
@@ -55,29 +44,20 @@ html(lang='en')
               span.js-allstream-error
             a.css-button.js-clear.js-http(data-protocol='http') Clear
           .css-tab-container.js-tab-container
-            
 
-        .js-ui-tab-view.css-ui-tab-view.js-all.css-inactive(data-name='udp')
+        .js-ui-tab-view.js-all.css-inactive(data-name='udp')
           .css-tab-bar.js-tab-bar
-          p Enter the port to listen on and click 'Listen'
-          .css-listen-form
-            input.js-portNum.js-udp.css-portNum(type='text')(data-protocol='udp')
-            a.css-button.css-openSocket.js-openSocket.js-udp(data-protocol='udp') Listen
-          .css-connection-info
-            .css-connection-status.js-udp-connection-status.off Connection Status
-          .css-top.right
-            p Save each packet seperately
-            input.js-udp-multifile(type="checkbox")(checked="true")
-            a.css-button.js-log.css-log.js-udp(data-protocol='udp')
-          .js-udp-stream.js-all-stream.css-stream
-            span.js-allstream-error
-          div.css-left.css-bottom
-            a.css-button.css-closeSocket.js-closeSocket.js-udp(data-protocol='udp') Close Connection
-          div.css-center.css-bottom
+            li.js-ui-tab.js-default.css-default.css-hidden(data-protocol="udp")
+              a(href='/udp/default')  +
+          .js-ui-tab-view.css-ui-tab-view(data-name='default')
+            p.css-enter-port Enter the port to listen on and click 'Listen'
+            .css-listen-form
+              input.js-portNum.js-udp.css-portNum(type='text')(data-protocol='udp')
+              a.css-button.css-openSocket.js-openSocket.js-udp(data-protocol='udp') Listen
+            .js-udp-stream.js-all-stream.css-stream
+              span.js-allstream-error
             a.css-button.js-clear.js-udp(data-protocol='udp') Clear
-          div.css-right.css-bottom
-            p Lock scroll to bottom
-            input.js-scroll.js-udp(type="checkbox")(checked="true")(data-protocol='udp')
+          .css-tab-container.js-tab-container
 
       span.js-all-templates.css-hidden
         span.js-message-template
@@ -110,7 +90,7 @@ script(src='pakmanaged.js', type='text/javascript')
             .css-connection-info
               .css-connection-status.js-http-connection-status.off Connection Status
             .css-top.right
-              p Save each packet seperately
+              p Save each packet separately
               input.js-http-multifile(type="checkbox")(checked="true")
               a.css-button.js-log.css-log(data-protocol='')
             .js-http-stream.js-all-stream.css-stream
