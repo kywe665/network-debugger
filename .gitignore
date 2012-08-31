@@ -1,5 +1,4 @@
 *.swp
 node_modules
 webclient-deployed
-*.txt
 *.kml

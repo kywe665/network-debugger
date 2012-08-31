@@ -1,0 +1,17 @@
+--v2.0.1 August 2012
+fixed a bug with dependencies
+
+--v2.0.0 August 2012
+major refactor of server code thanks to tigerbot. Logging is more accurate. All three protocols support multiple tabs. Multiple instances of netbug server can now run on the same machine. Multiple browsers can simultaneously view the same netbug server.
+
+--v1.5.6 July 2012
+TCP protocol now sorts multiple subscriptions made on the port and organizes them for logging.
+
+--v1.5.1 July 2012
+Made more stable. Now warns users if a port is in use.
+
+--v1.5.0 July 2012
+Reorganized filenames to sort timestamps by date. Milliseconds field added. Filenames now read (Year-Month-Day_Hour-Min-Sec-Millesec)
+
+--v1.4.5 June 2012
+Multiple HTTP tabs can now be opened.
