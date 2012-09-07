@@ -8,9 +8,13 @@ Network Debugging tool. Monitor Http, Tcp, and Udp traffic on your network. Save
 
 2. Install netbug with [npm](http://github.com/isaacs/npm):
 
+####Linux/Mac in terminal
     sudo npm install -g netbug
 
-## Run
+####Windows recommended in powershell, but also works in cmd
+    npm install -g netbug
+
+## Run from terminal
 
     netbug-server <port> <log-directory>
     
@@ -21,3 +25,4 @@ ex:
 ####Now open your browser to http://localhost:1234
 
 If you choose to log files they will be saved in the directory that you specified.
+
